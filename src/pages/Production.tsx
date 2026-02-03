@@ -44,6 +44,7 @@ import {
   TrendingUp,
   ChevronDown,
   Pencil,
+  Trash2,
 } from "lucide-react";
 
 interface ProductionBatch {
@@ -239,6 +240,10 @@ const Production = () => {
     );
   };
 
+  const handleDelete = (batchId: string) => {
+    setBatches((prev) => prev.filter((batch) => batch.id !== batchId));
+  };
+
   return (
     <DashboardLayout
       title="Production"
@@ -376,6 +381,14 @@ const Production = () => {
                       >
                         <Pencil className="h-4 w-4 mr-1" />
                         Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => handleDelete(batch.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </TableCell>
