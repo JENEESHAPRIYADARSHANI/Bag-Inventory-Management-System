@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { QuotationProvider } from "@/contexts/QuotationContext";
+import { InventoryProvider } from "@/contexts/InventoryContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 // Admin Pages
@@ -15,6 +16,7 @@ import Orders from "./pages/Orders";
 import Products from "./pages/Products";
 import Production from "./pages/Production";
 import Suppliers from "./pages/Suppliers";
+import Inventory from "./pages/Inventory";
 
 // Auth Pages
 import Login from "./pages/Login";
@@ -98,6 +100,14 @@ const AppRoutes = () => {
         }
       />
       <Route
+        path="/inventory"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <Inventory />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/suppliers"
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
@@ -176,11 +186,13 @@ const App = () => (
       <AuthProvider>
         <CartProvider>
           <QuotationProvider>
+            <InventoryProvider>
             <Toaster />
             <Sonner />
             <BrowserRouter>
               <AppRoutes />
             </BrowserRouter>
+            </InventoryProvider>
           </QuotationProvider>
         </CartProvider>
       </AuthProvider>
