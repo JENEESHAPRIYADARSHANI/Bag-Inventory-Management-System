@@ -27,4 +27,11 @@ public class InventoryServiceImpl implements InventoryService {
     public List<Inventory> getAllInventory() {
         return inventoryRepository.findAll();
     }
+    //UPDATE
+    @Override
+    public Inventory getInventoryById(Long id) {
+        return inventoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Inventory not found with id " + id));
+    }
+
 }

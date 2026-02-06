@@ -1,29 +1,56 @@
 package com.starbag.inventory.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.*;
 
-@Setter
-@Getter
 @Entity
+@Table(name = "inventory")
 public class Inventory {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long inventoryId;
-    private Long productid;
+
+    @Column(nullable = false)
+    private Long productId;
+
+    @Column(nullable = false)
     private int quantityInStock;
+
+    @Column(nullable = false)
     private int reorderLevel;
 
-    //super constructor
-    public Inventory() {
+    public Inventory() {}
+
+    // getters & setters
+    public Long getInventoryId() {
+        return inventoryId;
     }
 
-    public Inventory(int reorderLevel, int quantityInStock, Long productid, Long inventoryId) {
-        this.reorderLevel = reorderLevel;
-        this.quantityInStock = quantityInStock;
-        this.productid = productid;
+    public void setInventoryId(Long inventoryId) {
         this.inventoryId = inventoryId;
+    }
+
+    public Long getProductId() {
+        return productId;
+    }
+
+    public void setProductId(Long productId) {
+        this.productId = productId;
+    }
+
+    public int getQuantityInStock() {
+        return quantityInStock;
+    }
+
+    public void setQuantityInStock(int quantityInStock) {
+        this.quantityInStock = quantityInStock;
+    }
+
+    public int getReorderLevel() {
+        return reorderLevel;
+    }
+
+    public void setReorderLevel(int reorderLevel) {
+        this.reorderLevel = reorderLevel;
     }
 }

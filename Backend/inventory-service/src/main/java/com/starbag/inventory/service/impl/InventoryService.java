@@ -9,4 +9,7 @@ public interface InventoryService {
     Inventory createInventory(Inventory inventory);
 
     List<Inventory> getAllInventory();
+
+    Inventory getInventoryById(Long id);
+
 }
