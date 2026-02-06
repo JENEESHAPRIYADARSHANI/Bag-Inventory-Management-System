@@ -1,4 +1,8 @@
 package com.starbag.inventory.repository;
 
-public class InventoryRepository {
+import com.starbag.inventory.domain.Inventory;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface InventoryRepository extends JpaRepository<Inventory, Long> {
+
 }
