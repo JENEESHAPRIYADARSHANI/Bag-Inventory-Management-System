@@ -16,6 +16,7 @@ export function UserHeader() {
     { href: "/shop", label: "Shop" },
     { href: "/user/quotations", label: "Quotations" },
     { href: "/user/orders", label: "My Orders" },
+    { href: "/user/tracking", label: "Tracking" },
     { href: "/user/profile", label: "Profile" },
   ];
 

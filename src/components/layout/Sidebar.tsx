@@ -24,10 +24,11 @@ const navigation = [
   { name: "Customers", href: "/customers", icon: Users },
   { name: "Orders", href: "/orders", icon: ShoppingCart },
   { name: "Quotations", href: "/admin/quotations", icon: FileText },
+  { name: "Tracking", href: "/admin/tracking", icon: Truck },
   { name: "Products", href: "/products", icon: Package },
   { name: "Inventory", href: "/inventory", icon: Boxes },
   { name: "Production", href: "/production", icon: Factory },
-  { name: "Suppliers and Materials", href: "/suppliers", icon: Truck },
+  { name: "Suppliers and Materials", href: "/suppliers", icon: Boxes },
   { name: "Payments", href: "/payments", icon: CreditCard },
 ];
 

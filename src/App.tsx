@@ -8,6 +8,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import { QuotationProvider } from "@/contexts/QuotationContext";
 import { InventoryProvider } from "@/contexts/InventoryContext";
 import { PaymentProvider } from "@/contexts/PaymentContext";
+import { TrackingProvider } from "@/contexts/TrackingContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 // Admin Pages
@@ -23,8 +24,9 @@ import Payments from "./pages/Payments";
 // Auth Pages
 import Login from "./pages/Login";
 
-// Admin Quotations
+// Admin Quotations & Tracking
 import AdminQuotations from "./pages/AdminQuotations";
+import Tracking from "./pages/Tracking";
 
 // User Pages
 import Shop from "./pages/user/Shop";
@@ -33,6 +35,7 @@ import UserOrders from "./pages/user/Orders";
 import UserProfile from "./pages/user/Profile";
 import RequestQuotation from "./pages/user/RequestQuotation";
 import UserQuotations from "./pages/user/Quotations";
+import UserTracking from "./pages/user/Tracking";
 
 import NotFound from "./pages/NotFound";
 
@@ -126,6 +129,14 @@ const AppRoutes = () => {
         }
       />
       <Route
+        path="/admin/tracking"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <Tracking />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/payments"
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
@@ -183,6 +194,14 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/user/tracking"
+        element={
+          <ProtectedRoute allowedRoles={["user"]}>
+            <UserTracking />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Catch-all */}
       <Route path="*" element={<NotFound />} />
@@ -198,11 +217,13 @@ const App = () => (
           <QuotationProvider>
             <InventoryProvider>
             <PaymentProvider>
+            <TrackingProvider>
             <Toaster />
             <Sonner />
             <BrowserRouter>
               <AppRoutes />
             </BrowserRouter>
+            </TrackingProvider>
             </PaymentProvider>
             </InventoryProvider>
           </QuotationProvider>
