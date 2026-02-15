@@ -21,5 +21,11 @@ public class Supplier {
     private String contactPhone;
     private String address;
 
-    // Status field will be added in the next commit
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
+    public enum Status {
+        ACTIVE, INACTIVE
+    }
+
 }
