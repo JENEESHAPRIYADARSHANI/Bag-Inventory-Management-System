@@ -10,12 +10,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SupplierDto {
-    private Long id;
-    private Long supplierId;
-    private Long materialId;
-    private Double supplyPrice;
-    private Integer leadTimeDays;
+public class SupplierDto { private Long id;
+    private String name;
+    private String contactName;
+    private String contactEmail;
+    private String contactPhone;
+    private String address;
+    private String status;
 
 
 }
