@@ -1,10 +1,10 @@
-package com.starbag.Quotation_Management_Service;
+package com.example.quotation_service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class QuotationManagementServiceApplicationTests {
+class QuotationServiceApplicationTests {
 
 	@Test
 	void contextLoads() {
