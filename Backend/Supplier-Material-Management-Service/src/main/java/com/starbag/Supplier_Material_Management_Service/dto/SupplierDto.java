@@ -10,7 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SupplierDto { private Long id;
+public class SupplierDto {
+    private Long id;
     private String name;
     private String contactName;
     private String contactEmail;

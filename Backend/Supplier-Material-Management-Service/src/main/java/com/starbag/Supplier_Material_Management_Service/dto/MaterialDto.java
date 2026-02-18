@@ -1,7 +1,5 @@
 package com.starbag.Supplier_Material_Management_Service.dto;
 
-
-import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MatterialDto {
+public class MaterialDto {
     private Long id;
     private String name;
     private String type;
