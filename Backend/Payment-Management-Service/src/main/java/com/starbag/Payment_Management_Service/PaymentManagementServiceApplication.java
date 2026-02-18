@@ -1,3 +1,4 @@
+//payment service application entry point
 package com.starbags.payment;
 
 import org.springframework.boot.SpringApplication;
