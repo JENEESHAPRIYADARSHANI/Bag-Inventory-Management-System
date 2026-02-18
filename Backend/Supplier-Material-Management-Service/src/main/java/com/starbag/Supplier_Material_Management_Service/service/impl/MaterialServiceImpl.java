@@ -54,4 +54,22 @@ public class MaterialServiceImpl implements MaterialService {
 
     }
 
+    @Override
+    public void deleteMaterial(Long id){
+        Material material = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Material not found"));
+        repository.delete(material);
+    }
+
+    private MaterialDto toDto(Material material){
+        return MaterialDto.builder()
+                .id(material.getId())
+                .name(material.getName())
+                .type(material.getType())
+                .unit(material.getUnit())
+                .unitPrice(material.getUnitPrice())
+                .reorderLevel(material.getReorderLevel())
+                .status(material.getStatus().name())
+                .build();
+    }
 }
