@@ -25,4 +25,20 @@ public class MaterialController {
         return service.getMaterialById(id);
     }
 
+    @PostMapping
+    public MaterialDto create(@RequestBody MaterialDto dto) {
+        return service.createMaterial(dto);
+    }
+
+    @PutMapping("/{id}")
+    public MaterialDto update(@PathVariable Long id, @RequestBody MaterialDto dto) {
+        return service.updateMaterial(id, dto);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        service.deleteMaterial(id);
+    }
+
+
 }
