@@ -12,6 +12,7 @@ import com.starbag.Supplier_Material_Management_Service.service.SupplierMaterial
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,6 +61,23 @@ public class SupplierMaterialMappingServiceImpl implements SupplierMaterialMappi
         mapping.setSupplyPrice(dto.getSupplyPrice());
         mapping.setLeadTimeDays(dto.getLeadTimeDays());
         return toDto(repository.save(mapping));
+    }
+
+    @Override
+    public void deleteMapping(Long id) {
+        SupplierMaterialMapping mapping = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Mapping not found"));
+        repository.delete(mapping);
+    }
+
+    private SupplierMaterialMappingDto toDto(SupplierMaterialMapping mapping) {
+        return SupplierMaterialMappingDto.builder()
+                .id(mapping.getId())
+                .supplierId(mapping.getSupplier().getId())
+                .materialId(mapping.getMaterial().getId())
+                .supplyPrice(mapping.getSupplyPrice())
+                .leadTimeDays(mapping.getLeadTimeDays())
+                .build();
     }
 
 }
