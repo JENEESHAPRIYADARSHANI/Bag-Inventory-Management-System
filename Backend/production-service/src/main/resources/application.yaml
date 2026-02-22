@@ -1,3 +1,19 @@
 spring:
   application:
     name: production-service
+  datasource:
+    # database connection details
+    url: jdbc:mysql://localhost:3307/starbag_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+    username: root
+    password: "@Abishek2001"
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+server:
+  port: 8081
