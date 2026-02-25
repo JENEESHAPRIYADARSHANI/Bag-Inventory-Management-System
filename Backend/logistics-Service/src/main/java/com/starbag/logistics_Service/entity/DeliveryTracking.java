@@ -1,40 +1,62 @@
 package com.starbag.logistics_Service.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.*;
-
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Getter
-@Setter
+@Table(name = "delivery_tracking")
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class DeliveryTracking {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String trackingId;
 
+    @Column(nullable = false)
     private String orderId;
-    private String customerName;
-    private String deliveryAddress;
+
+    private String carrierName;
+
+    private String currentStatus;
+
+    private String currentLocation;
 
     private LocalDateTime estimatedDeliveryDate;
 
-    private String currentStatus;
-    private LocalDateTime lastUpdated;
+    private LocalDateTime actualDeliveryDate;
 
-    @OneToMany(mappedBy = "deliveryTracking",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
-    @JsonManagedReference
-    private List<TrackingHistory> historyList = new ArrayList<>();
+    private String recipientName;
+
+    private String recipientPhone;
+
+    private String deliveryAddress;
+
+    private String remarks;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "deliveryTracking", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<TrackingHistory> trackingHistory;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }
