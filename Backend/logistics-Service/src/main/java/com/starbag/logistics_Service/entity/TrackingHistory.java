@@ -1,30 +1,43 @@
 package com.starbag.logistics_Service.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
-
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter
-@Setter
+@Table(name = "tracking_history")
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class TrackingHistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "delivery_tracking_id", nullable = false)
+    @JsonIgnore
+    private DeliveryTracking deliveryTracking;
+
+    @Column(nullable = false)
     private String status;
+
+    private String location;
+
     private String message;
-    private LocalDateTime updatedAt;
+
     private String updatedBy;
 
-    @ManyToOne
-    @JoinColumn(name = "delivery_tracking_id")
-    @JsonBackReference
-    private DeliveryTracking deliveryTracking;
+    private String remarks;
+
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        updatedAt = LocalDateTime.now();
+    }
 }
