@@ -40,4 +40,5 @@ public class TrackingHistory {
     protected void onCreate() {
         updatedAt = LocalDateTime.now();
     }
+
 }

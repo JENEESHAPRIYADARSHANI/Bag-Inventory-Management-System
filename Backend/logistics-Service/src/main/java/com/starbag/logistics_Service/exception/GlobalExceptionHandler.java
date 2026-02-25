@@ -20,6 +20,7 @@ public class GlobalExceptionHandler {
         error.put("error", "Not Found");
         error.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+
     }
 
     @ExceptionHandler(RuntimeException.class)

@@ -13,4 +13,5 @@ public class StatusUpdateRequest {
     private String location;
     private String updatedBy;
     private String remarks;
+
 }

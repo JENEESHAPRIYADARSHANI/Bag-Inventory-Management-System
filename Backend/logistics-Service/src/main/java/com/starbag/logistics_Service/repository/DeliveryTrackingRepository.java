@@ -13,6 +13,7 @@ public interface DeliveryTrackingRepository extends JpaRepository<DeliveryTracki
 
     Optional<DeliveryTracking> findByTrackingId(String trackingId);
 
+
     Optional<DeliveryTracking> findByOrderId(String orderId);
 
     List<DeliveryTracking> findByCurrentStatus(String status);

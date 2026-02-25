@@ -14,6 +14,7 @@ public interface DeliveryTrackingService {
 
     DeliveryTracking createTrackingFromRequest(TrackingRequest request);
 
+
     List<DeliveryTracking> getAll();
 
     DeliveryTracking getByTrackingId(String trackingId);
