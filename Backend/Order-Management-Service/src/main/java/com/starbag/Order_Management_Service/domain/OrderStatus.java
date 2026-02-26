@@ -1,4 +1,4 @@
-package com.starbag.Order_Management_Service.enums;
+package com.starbag.Order_Management_Service.domain;
 
 public enum OrderStatus {
     PENDING,

@@ -3,7 +3,7 @@ package com.starbag.Supplier_Material_Management_Service.controller;
 
 import com.starbag.Supplier_Material_Management_Service.dto.MaterialDto;
 import com.starbag.Supplier_Material_Management_Service.service.MaterialService;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.web.bind.annotation.RequestBody;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
