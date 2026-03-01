@@ -16,8 +16,8 @@ import {
 export interface Supplier {
   id: string;
   name: string;
-  email: string;
-  phone: string;
+  contactEmail: string;
+  contactPhone: string;
   address: string;
   status: "active" | "inactive";
 }
@@ -44,8 +44,8 @@ export function SupplierProvider({ children }: { children: ReactNode }) {
         const mapped = data.map((s: any) => ({
           id: String(s.id),
           name: s.name,
-          email: s.email,
-          phone: s.phone,
+          contactEmail: s.email,
+          contactPhone: s.phone,
           address: s.address,
           status: s.status,
         }));

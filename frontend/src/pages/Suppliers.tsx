@@ -60,8 +60,8 @@ import { useSupplier } from "@/contexts/SupplierContext";
 interface Supplier {
   id: string;
   name: string;
-  email: string;
-  phone: string;
+  contactEmail: string;
+  contactPhone: string;
   address: string;
   status: "active" | "inactive";
 }
@@ -93,8 +93,8 @@ export default function Suppliers() {
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [supplierForm, setSupplierForm] = useState({
     name: "",
-    email: "",
-    phone: "",
+    contactEmail: "",
+    contactPhone: "",
     address: "",
     status: "active" as "active" | "inactive",
   });
@@ -138,7 +138,7 @@ export default function Suppliers() {
   const filteredSuppliers = suppliers.filter(
     (s) =>
       s.name.toLowerCase().includes(supplierSearch.toLowerCase()) ||
-      s.email.toLowerCase().includes(supplierSearch.toLowerCase()),
+      s.contactEmail.toLowerCase().includes(supplierSearch.toLowerCase()),
   );
 
   const filteredMaterials = materials.filter(
@@ -156,8 +156,8 @@ export default function Suppliers() {
       setEditingSupplier(null);
       setSupplierForm({
         name: "",
-        email: "",
-        phone: "",
+        contactEmail: "",
+        contactPhone: "",
         address: "",
         status: "active",
       });
@@ -512,9 +512,9 @@ export default function Suppliers() {
                           </TableCell>
                           <TableCell>
                             <div className="space-y-1">
-                              <p className="text-sm">{supplier.email}</p>
+                              <p className="text-sm">{supplier.contactEmail}</p>
                               <p className="text-xs text-muted-foreground">
-                                {supplier.phone}
+                                {supplier.contactPhone}
                               </p>
                             </div>
                           </TableCell>
@@ -902,9 +902,12 @@ export default function Suppliers() {
                 <Input
                   id="supplier-email"
                   type="email"
-                  value={supplierForm.email}
+                  value={supplierForm.contactEmail}
                   onChange={(e) =>
-                    setSupplierForm({ ...supplierForm, email: e.target.value })
+                    setSupplierForm({
+                      ...supplierForm,
+                      contactEmail: e.target.value,
+                    })
                   }
                   placeholder="email@example.com"
                 />
@@ -913,9 +916,12 @@ export default function Suppliers() {
                 <Label htmlFor="supplier-phone">Phone</Label>
                 <Input
                   id="supplier-phone"
-                  value={supplierForm.phone}
+                  value={supplierForm.contactPhone}
                   onChange={(e) =>
-                    setSupplierForm({ ...supplierForm, phone: e.target.value })
+                    setSupplierForm({
+                      ...supplierForm,
+                      contactPhone: e.target.value,
+                    })
                   }
                   placeholder="+1 555-0100"
                 />
