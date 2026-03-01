@@ -7,17 +7,12 @@ import { AddInventoryDialog } from "@/components/inventory/AddInventoryDialog";
 import { InventoryDetailDialog } from "@/components/inventory/InventoryDetailDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Plus,
-  Package,
-  AlertTriangle,
-  XCircle,
-  Boxes,
-} from "lucide-react";
+import { Plus, Package, AlertTriangle, XCircle, Boxes } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const Inventory = () => {
-  const { items, addItem, updateItem, deleteItem, increaseStock, reduceStock } = useInventory();
+  const { items, addItem, updateItem, deleteItem, increaseStock, reduceStock } =
+    useInventory();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -26,7 +21,8 @@ const Inventory = () => {
     total: items.length,
     totalUnits: items.reduce((sum, i) => sum + i.quantityInStock, 0),
     lowStock: items.filter((i) => getStockStatus(i) === "low_stock").length,
-    outOfStock: items.filter((i) => getStockStatus(i) === "out_of_stock").length,
+    outOfStock: items.filter((i) => getStockStatus(i) === "out_of_stock")
+      .length,
   };
 
   const handleView = (item: InventoryItem) => {
@@ -45,7 +41,10 @@ const Inventory = () => {
   };
 
   return (
-    <DashboardLayout title="Inventory" subtitle="Manage product stock levels and reorder points">
+    <DashboardLayout
+      title="Inventory"
+      subtitle="Manage product stock levels and reorder points"
+    >
       {/* Stats Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
         {[
@@ -79,9 +78,16 @@ const Inventory = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">{stat.label}</p>
-                  <p className="text-2xl font-bold text-foreground mt-1">{stat.value}</p>
+                  <p className="text-2xl font-bold text-foreground mt-1">
+                    {stat.value}
+                  </p>
                 </div>
-                <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg", stat.color)}>
+                <div
+                  className={cn(
+                    "flex h-10 w-10 items-center justify-center rounded-lg",
+                    stat.color,
+                  )}
+                >
                   <stat.icon className="h-5 w-5" />
                 </div>
               </div>
@@ -95,7 +101,10 @@ const Inventory = () => {
         <h2 className="font-display text-lg font-semibold text-foreground">
           Inventory Records
         </h2>
-        <Button className="btn-gradient gap-2" onClick={() => setIsAddOpen(true)}>
+        <Button
+          className="btn-gradient gap-2"
+          onClick={() => setIsAddOpen(true)}
+        >
           <Plus className="h-4 w-4" />
           Add Inventory
         </Button>
