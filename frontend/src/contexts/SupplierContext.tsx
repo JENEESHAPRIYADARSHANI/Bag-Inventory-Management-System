@@ -31,7 +31,7 @@ interface SupplierContextType {
 }
 
 const SupplierContext = createContext<SupplierContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export function SupplierProvider({ children }: { children: ReactNode }) {
@@ -73,9 +73,7 @@ export function SupplierProvider({ children }: { children: ReactNode }) {
     const updated = await updateSupplier(id, data);
 
     setSuppliers((prev) =>
-      prev.map((s) =>
-        s.id === id ? { ...s, ...updated } : s
-      )
+      prev.map((s) => (s.id === id ? { ...s, ...updated } : s)),
     );
   };
 
