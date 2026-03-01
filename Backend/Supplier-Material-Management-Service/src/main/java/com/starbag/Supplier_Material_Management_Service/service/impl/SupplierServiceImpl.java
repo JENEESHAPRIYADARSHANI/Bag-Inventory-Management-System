@@ -31,7 +31,6 @@ public class SupplierServiceImpl implements SupplierService {
     public SupplierDto createSupplier(SupplierDto dto) {
         Supplier supplier = Supplier.builder()
                 .name(dto.getName())
-                .contactName(dto.getContactName())
                 .contactEmail(dto.getContactEmail())
                 .contactPhone(dto.getContactPhone())
                 .address(dto.getAddress())
@@ -45,7 +44,6 @@ public class SupplierServiceImpl implements SupplierService {
         Supplier supplier = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Supplier not found"));
         supplier.setName(dto.getName());
-        supplier.setContactName(dto.getContactName());
         supplier.setContactEmail(dto.getContactEmail());
         supplier.setContactPhone(dto.getContactPhone());
         supplier.setAddress(dto.getAddress());
@@ -64,7 +62,6 @@ public class SupplierServiceImpl implements SupplierService {
         return SupplierDto.builder()
                 .id(supplier.getId())
                 .name(supplier.getName())
-                .contactName(supplier.getContactName())
                 .contactEmail(supplier.getContactEmail())
                 .contactPhone(supplier.getContactPhone())
                 .address(supplier.getAddress())
