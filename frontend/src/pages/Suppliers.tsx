@@ -89,6 +89,7 @@ export default function Suppliers() {
     useSupplier();
 
   // --- State ---
+
   const [supplierDialogOpen, setSupplierDialogOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [supplierForm, setSupplierForm] = useState({
@@ -111,6 +112,7 @@ export default function Suppliers() {
     reorderLevel: 0,
     status: "active" as "active" | "disabled",
   });
+
   const [materialSearch, setMaterialSearch] = useState("");
 
   const [mappings, setMappings] = useState<SupplierMaterialMapping[]>([]);
@@ -256,6 +258,10 @@ export default function Suppliers() {
 
   // --- Mapping Handlers ---
   const openMappingDialog = (mapping?: SupplierMaterialMapping) => {
+    // Make sure suppliers and materials are loaded
+    if (suppliers.length === 0) fetchSuppliers();
+    if (materials.length === 0) fetchMaterials();
+
     if (mapping) {
       setEditingMapping(mapping);
       setMappingForm({ ...mapping });
@@ -297,12 +303,16 @@ export default function Suppliers() {
     }
   };
 
-  const getSupplierName = (id: string) =>
-    suppliers.find((s) => s.id === id)?.name || "Unknown";
-  const getMaterialName = (id: string) =>
-    materials.find((m) => m.id === id)?.name || "Unknown";
-
   // --- Fetch Backend Data ---
+  const fetchSuppliers = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/api/suppliers`);
+      // If your hook doesn't already update, you may need a method in your hook to set suppliers
+      // Or remove fetchSuppliers entirely if your hook handles it
+    } catch (error) {
+      console.error("Error fetching suppliers:", error);
+    }
+  };
 
   const fetchMaterials = async () => {
     try {
@@ -322,7 +332,14 @@ export default function Suppliers() {
     }
   };
 
+  // --- Helper Functions ---
+  const getSupplierName = (id: string) =>
+    suppliers.find((s) => s.id === id)?.name || "Unknown";
+  const getMaterialName = (id: string) =>
+    materials.find((m) => m.id === id)?.name || "Unknown";
+
   useEffect(() => {
+    fetchSuppliers();
     fetchMaterials();
     fetchMappings();
   }, []);
@@ -1105,7 +1122,7 @@ export default function Suppliers() {
         </DialogContent>
       </Dialog>
 
-      {/* Mapping Dialog */}
+      {/* --- Mapping Dialog --- */}
       <Dialog open={mappingDialogOpen} onOpenChange={setMappingDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
@@ -1121,7 +1138,9 @@ export default function Suppliers() {
                 : "Link a supplier to a material with pricing"}
             </DialogDescription>
           </DialogHeader>
+
           <div className="space-y-4 py-4">
+            {/* --- Supplier Dropdown --- */}
             <div className="space-y-2">
               <Label htmlFor="mapping-supplier">Supplier</Label>
               <Select
@@ -1147,6 +1166,8 @@ export default function Suppliers() {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* --- Material Dropdown --- */}
             <div className="space-y-2">
               <Label htmlFor="mapping-material">Material</Label>
               <Select
@@ -1172,6 +1193,8 @@ export default function Suppliers() {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* --- Price and Lead Time --- */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="mapping-price">Supply Price ($)</Label>
@@ -1206,6 +1229,7 @@ export default function Suppliers() {
               </div>
             </div>
           </div>
+
           <DialogFooter>
             <Button
               variant="outline"
