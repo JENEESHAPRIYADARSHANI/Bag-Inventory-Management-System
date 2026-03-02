@@ -1,15 +1,15 @@
 package com.starbag.production.service;
 
-import com.starbag.production.domain.ProductionBatch;
+import com.starbag.production.dto.ProductionBatchDto;
 import java.util.List;
 
 public interface ProductionService {
 
-    List<ProductionBatch> getAllBatches();
+    List<ProductionBatchDto> getAllBatches();
 
-    ProductionBatch createBatch(ProductionBatch batch);
+    ProductionBatchDto createBatch(ProductionBatchDto batchDto);
 
-    ProductionBatch updateBatch(String id, ProductionBatch batchDetails);
+    ProductionBatchDto updateBatch(String id, ProductionBatchDto batchDetails);
 
     void deleteBatch(String id);
 }
