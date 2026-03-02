@@ -1,4 +1,4 @@
-package com.starbag.Order_Management_Service.service.impl;
+package com.starbag.Order_Management_Service.service;
 
 import com.starbag.Order_Management_Service.domain.Order;
 import com.starbag.Order_Management_Service.domain.OrderStatus;
