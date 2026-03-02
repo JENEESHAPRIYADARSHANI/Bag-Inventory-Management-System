@@ -6,11 +6,10 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { QuotationProvider } from "@/contexts/QuotationContext";
-import { InventoryProvider } from "@/contexts/InventoryContext";
 import { PaymentProvider } from "@/contexts/PaymentContext";
 import { TrackingProvider } from "@/contexts/TrackingContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-
+import { SupplierProvider } from "./contexts/SupplierContext";
 // Admin Pages
 import Index from "./pages/Index";
 import Customers from "./pages/Customers";
@@ -18,7 +17,7 @@ import Orders from "./pages/Orders";
 import Products from "./pages/Products";
 import Production from "./pages/Production";
 import Suppliers from "./pages/Suppliers";
-import Inventory from "./pages/Inventory";
+// import Inventory from "./pages/Inventory";
 import Payments from "./pages/Payments";
 
 // Auth Pages
@@ -44,13 +43,13 @@ const queryClient = new QueryClient();
 // Smart redirect component
 function HomeRedirect() {
   const { user, isLoading } = useAuth();
-  
+
   if (isLoading) return null;
-  
+
   if (!user) return <Navigate to="/login" replace />;
-  
+
   if (user.role === "admin") return <Navigate to="/admin" replace />;
-  
+
   return <Navigate to="/shop" replace />;
 }
 
@@ -59,10 +58,10 @@ const AppRoutes = () => {
     <Routes>
       {/* Public Routes */}
       <Route path="/login" element={<Login />} />
-      
+
       {/* Smart Home Redirect */}
       <Route path="/" element={<HomeRedirect />} />
-      
+
       {/* Admin Routes */}
       <Route
         path="/admin"
@@ -104,14 +103,14 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-      <Route
+      {/* <Route
         path="/inventory"
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
             <Inventory />
           </ProtectedRoute>
         }
-      />
+      /> */}
       <Route
         path="/suppliers"
         element={
@@ -213,21 +212,21 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
-        <CartProvider>
-          <QuotationProvider>
-            <InventoryProvider>
-            <PaymentProvider>
-            <TrackingProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <AppRoutes />
-            </BrowserRouter>
-            </TrackingProvider>
-            </PaymentProvider>
-            </InventoryProvider>
-          </QuotationProvider>
-        </CartProvider>
+        <SupplierProvider>
+          <CartProvider>
+            <QuotationProvider>
+              <PaymentProvider>
+                <TrackingProvider>
+                  <Toaster />
+                  <Sonner />
+                  <BrowserRouter>
+                    <AppRoutes />
+                  </BrowserRouter>
+                </TrackingProvider>
+              </PaymentProvider>
+            </QuotationProvider>
+          </CartProvider>
+        </SupplierProvider>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
