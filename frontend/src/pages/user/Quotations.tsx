@@ -28,6 +28,11 @@ const statusConfig: Record<QuotationStatus, { label: string; icon: typeof Clock;
     icon: CheckCircle,
     className: "bg-success/10 text-success border-success/20",
   },
+  accepted: {
+    label: "Accepted",
+    icon: CheckCircle,
+    className: "bg-info/10 text-info border-info/20",
+  },
   rejected: {
     label: "Rejected",
     icon: XCircle,
