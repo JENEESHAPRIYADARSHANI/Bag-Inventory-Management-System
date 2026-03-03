@@ -1,4 +1,4 @@
-package com.starbags.payment.exception;
+package com.starbag.Payment_Management_Service.exception;
 
 import org.springframework.http.*;
 import org.springframework.web.bind.MethodArgumentNotValidException;

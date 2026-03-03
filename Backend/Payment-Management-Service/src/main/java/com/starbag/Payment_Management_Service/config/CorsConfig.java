@@ -1,4 +1,4 @@
-package com.starbags.payment.config;
+package com.starbag.Payment_Management_Service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

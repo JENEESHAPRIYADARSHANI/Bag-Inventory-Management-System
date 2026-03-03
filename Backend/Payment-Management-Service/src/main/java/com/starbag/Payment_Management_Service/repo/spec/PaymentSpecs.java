@@ -1,8 +1,8 @@
-package com.starbags.payment.repo.spec;
+package com.starbag.Payment_Management_Service.repo.spec;
 
-import com.starbags.payment.entity.Payment;
-import com.starbags.payment.entity.enums.PaymentMethod;
-import com.starbags.payment.entity.enums.PaymentStatus;
+import com.starbag.Payment_Management_Service.entity.Payment;
+import com.starbag.Payment_Management_Service.entity.enums.PaymentMethod;
+import com.starbag.Payment_Management_Service.entity.enums.PaymentStatus;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
