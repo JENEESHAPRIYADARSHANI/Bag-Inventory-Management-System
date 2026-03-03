@@ -36,6 +36,7 @@ import UserProfile from "./pages/user/Profile";
 import RequestQuotation from "./pages/user/RequestQuotation";
 import UserQuotations from "./pages/user/Quotations";
 import UserTracking from "./pages/user/Tracking";
+import UserPaymentMethods from "@/pages/user/UserPaymentMethods";
 
 import NotFound from "./pages/NotFound";
 
@@ -44,13 +45,13 @@ const queryClient = new QueryClient();
 // Smart redirect component
 function HomeRedirect() {
   const { user, isLoading } = useAuth();
-  
+
   if (isLoading) return null;
-  
+
   if (!user) return <Navigate to="/login" replace />;
-  
+
   if (user.role === "admin") return <Navigate to="/admin" replace />;
-  
+
   return <Navigate to="/shop" replace />;
 }
 
@@ -59,10 +60,10 @@ const AppRoutes = () => {
     <Routes>
       {/* Public Routes */}
       <Route path="/login" element={<Login />} />
-      
+
       {/* Smart Home Redirect */}
       <Route path="/" element={<HomeRedirect />} />
-      
+
       {/* Admin Routes */}
       <Route
         path="/admin"
@@ -203,6 +204,16 @@ const AppRoutes = () => {
         }
       />
 
+      {/* ✅ Payment Methods Route */}
+      <Route
+        path="/user/payment-methods"
+        element={
+          <ProtectedRoute allowedRoles={["user"]}>
+            <UserPaymentMethods />
+          </ProtectedRoute>
+        }
+      />
+
       {/* Catch-all */}
       <Route path="*" element={<NotFound />} />
     </Routes>
@@ -216,15 +227,15 @@ const App = () => (
         <CartProvider>
           <QuotationProvider>
             <InventoryProvider>
-            <PaymentProvider>
-            <TrackingProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <AppRoutes />
-            </BrowserRouter>
-            </TrackingProvider>
-            </PaymentProvider>
+              <PaymentProvider>
+                <TrackingProvider>
+                  <Toaster />
+                  <Sonner />
+                  <BrowserRouter>
+                    <AppRoutes />
+                  </BrowserRouter>
+                </TrackingProvider>
+              </PaymentProvider>
             </InventoryProvider>
           </QuotationProvider>
         </CartProvider>
