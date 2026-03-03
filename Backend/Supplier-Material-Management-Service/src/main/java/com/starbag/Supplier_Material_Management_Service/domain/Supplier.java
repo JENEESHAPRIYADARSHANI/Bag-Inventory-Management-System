@@ -3,6 +3,9 @@ package com.starbag.Supplier_Material_Management_Service.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+
+@Getter
+@Setter
 @Entity
 @Table(name = "suppliers")
 @Data
@@ -16,7 +19,6 @@ public class Supplier {
     private Long id;
 
     private String name;
-    private String contactName;
     private String contactEmail;
     private String contactPhone;
     private String address;

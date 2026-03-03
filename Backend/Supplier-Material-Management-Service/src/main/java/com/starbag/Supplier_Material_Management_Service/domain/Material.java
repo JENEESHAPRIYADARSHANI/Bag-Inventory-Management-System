@@ -1,13 +1,11 @@
 package com.starbag.Supplier_Material_Management_Service.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 
-
+@Getter
+@Setter
 @Entity
 @Table(name ="materials")
 @Data
