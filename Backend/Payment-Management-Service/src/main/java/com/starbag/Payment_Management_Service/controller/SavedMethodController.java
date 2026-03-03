@@ -1,8 +1,8 @@
-package com.starbags.payment.controller;
+package com.starbag.Payment_Management_Service.controller;
 
-import com.starbags.payment.entity.SavedPaymentMethod;
-import com.starbags.payment.entity.enums.MethodStatus;
-import com.starbags.payment.service.SavedMethodService;
+import com.starbag.Payment_Management_Service.entity.SavedPaymentMethod;
+import com.starbag.Payment_Management_Service.entity.enums.MethodStatus;
+import com.starbag.Payment_Management_Service.service.SavedMethodService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

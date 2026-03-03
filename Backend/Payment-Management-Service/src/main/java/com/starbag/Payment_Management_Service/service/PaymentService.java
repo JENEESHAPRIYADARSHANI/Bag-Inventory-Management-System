@@ -1,11 +1,11 @@
-package com.starbags.payment.service;
+package com.starbag.Payment_Management_Service.service;
 
-import com.starbags.payment.dto.*;
-import com.starbags.payment.entity.Payment;
-import com.starbags.payment.entity.enums.PaymentMethod;
-import com.starbags.payment.entity.enums.PaymentStatus;
-import com.starbags.payment.exception.NotFoundException;
-import com.starbags.payment.repo.PaymentRepository;
+import com.starbag.Payment_Management_Service.dto.*;
+import com.starbag.Payment_Management_Service.entity.Payment;
+import com.starbag.Payment_Management_Service.entity.enums.PaymentMethod;
+import com.starbag.Payment_Management_Service.entity.enums.PaymentStatus;
+import com.starbag.Payment_Management_Service.exception.NotFoundException;
+import com.starbag.Payment_Management_Service.repo.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import static com.starbags.payment.repo.spec.PaymentSpecs.*;
+import static com.starbag.Payment_Management_Service.repo.spec.PaymentSpecs.*;
 
 @Service
 @RequiredArgsConstructor
