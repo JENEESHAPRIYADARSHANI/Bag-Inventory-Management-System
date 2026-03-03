@@ -35,6 +35,7 @@ import UserProfile from "./pages/user/Profile";
 import RequestQuotation from "./pages/user/RequestQuotation";
 import UserQuotations from "./pages/user/Quotations";
 import UserTracking from "./pages/user/Tracking";
+import UserPaymentMethods from "@/pages/user/UserPaymentMethods";
 
 import NotFound from "./pages/NotFound";
 
@@ -202,6 +203,16 @@ const AppRoutes = () => {
         }
       />
 
+      {/* ✅ Payment Methods Route */}
+      <Route
+        path="/user/payment-methods"
+        element={
+          <ProtectedRoute allowedRoles={["user"]}>
+            <UserPaymentMethods />
+          </ProtectedRoute>
+        }
+      />
+
       {/* Catch-all */}
       <Route path="*" element={<NotFound />} />
     </Routes>
@@ -212,6 +223,9 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
+        <CartProvider>
+          <QuotationProvider>
+            <InventoryProvider>
         <SupplierProvider>
           <CartProvider>
             <QuotationProvider>
@@ -224,6 +238,9 @@ const App = () => (
                   </BrowserRouter>
                 </TrackingProvider>
               </PaymentProvider>
+            </InventoryProvider>
+          </QuotationProvider>
+        </CartProvider>
             </QuotationProvider>
           </CartProvider>
         </SupplierProvider>

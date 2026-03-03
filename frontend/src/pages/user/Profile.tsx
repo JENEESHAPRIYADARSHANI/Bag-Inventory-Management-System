@@ -7,10 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { User, Mail, Save } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom"; // ✅ Added
 import { toast } from "sonner";
 
 const UserProfile = () => {
   const { user } = useAuth();
+  const navigate = useNavigate(); // ✅ Added
   const [name, setName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
   const [isSaving, setIsSaving] = useState(false);
@@ -103,6 +105,22 @@ const UserProfile = () => {
                 })}
               </p>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* ✅ Added Payment Navigation Card Only */}
+        <Card
+          className="border-border/50 cursor-pointer hover:bg-muted/40 transition"
+          onClick={() => navigate("/user/payment-methods")}
+        >
+          <CardContent className="flex justify-between items-center py-6">
+            <div>
+              <p className="font-medium">Payment Methods</p>
+              <p className="text-sm text-muted-foreground">
+                Manage your saved cards
+              </p>
+            </div>
+            <span className="text-primary font-medium">View</span>
           </CardContent>
         </Card>
 

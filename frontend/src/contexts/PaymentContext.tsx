@@ -37,6 +37,13 @@ export function PaymentProvider({ children }: { children: ReactNode }) {
   const refreshPayments = async () => {
     try {
       const response = await paymentApi.getPayments({ size: 100 });
+      
+      // Handle empty response
+      if (!response || !response.content) {
+        setPayments([]);
+        return;
+      }
+      
       const mappedPayments: Payment[] = response.content.map((p) => ({
         id: p.paymentId,
         orderId: p.orderId,
@@ -48,9 +55,13 @@ export function PaymentProvider({ children }: { children: ReactNode }) {
         transactionRef: p.txnRef,
       }));
       setPayments(mappedPayments);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to fetch payments:", error);
-      toast.error("Failed to load payments");
+      // Only show error if it's not a 404 (no data found)
+      if (error?.response?.status !== 404) {
+        toast.error("Failed to load payments");
+      }
+      setPayments([]);
     }
   };
 
@@ -58,17 +69,28 @@ export function PaymentProvider({ children }: { children: ReactNode }) {
   const refreshSavedMethods = async () => {
     try {
       const methods = await savedMethodApi.getMethods();
+      
+      // Handle empty array (no error, just no data)
+      if (!methods || methods.length === 0) {
+        setSavedMethods([]);
+        return;
+      }
+      
       const mappedMethods: SavedPaymentMethod[] = methods.map((m) => ({
         id: String(m.id),
-        methodType: m.type.toLowerCase() as PaymentMethod,
-        cardHolderName: m.cardHolderName,
-        maskedCardNumber: `**** **** **** ${m.last4}`,
-        expiryDate: `${String(m.expiryMonth).padStart(2, '0')}/${String(m.expiryYear).slice(-2)}`,
+        methodType: (m.type?.toLowerCase() || 'card') as PaymentMethod,
+        cardHolderName: m.cardHolderName || 'Unknown',
+        maskedCardNumber: `**** **** **** ${m.last4 || '****'}`,
+        expiryDate: `${String(m.expiryMonth || 1).padStart(2, '0')}/${String(m.expiryYear || 2025).slice(-2)}`,
       }));
       setSavedMethods(mappedMethods);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to fetch saved methods:", error);
-      toast.error("Failed to load saved payment methods");
+      // Only show error if it's not a 404 (no data found)
+      if (error?.response?.status !== 404) {
+        toast.error("Failed to load saved payment methods");
+      }
+      setSavedMethods([]);
     }
   };
 
