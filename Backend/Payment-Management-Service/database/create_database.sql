@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS saved_payment_methods (
     customer_name VARCHAR(150) NOT NULL,
     type VARCHAR(30) NOT NULL,
     card_holder_name VARCHAR(120) NOT NULL,
-    last4 VARCHAR(4) NOT NULL,
+    last4 VARCHAR(500) NOT NULL,
     expiry_month INT NOT NULL,
     expiry_year INT NOT NULL,
     brand VARCHAR(40),
