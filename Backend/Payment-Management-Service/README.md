@@ -1,315 +1,191 @@
-# Payment Management Service
+# Payment Methods Management Service
 
-A comprehensive Spring Boot microservice for managing payments and saved payment methods with user and admin operations.
+A backend REST API service for managing saved payment methods and cards, built with Spring Boot and MySQL.
 
-## Features
+**University Project Topic:** Payment Options Management
 
-### Payment Management (Existing)
-- Record payments with multiple payment methods (Card, Cash, Online Transfer)
-- Track payment status (Completed, Pending, Failed)
-- Payment history with filtering and search
-- Payment verification system
-- Revenue and payment statistics
+---
 
-### Saved Payment Methods (Existing)
-- Save customer payment card details (last 4 digits only)
-- Manage saved payment methods
-- Enable/disable payment methods
-- CRUD operations for payment methods
+## 📋 Quick Links
 
-### Card Management (Your Part - To Be Implemented)
-You need to create a new card management module with the following features:
+- **[SYSTEM_OVERVIEW.md](SYSTEM_OVERVIEW.md)** - Architecture, database design, ER diagrams
+- **[SYSTEM_ARCHITECTURE.md](SYSTEM_ARCHITECTURE.md)** - File structure & what each file does
+- **[SYSTEM_FLOWS.md](SYSTEM_FLOWS.md)** - Data flows, API workflows, diagrams
+- **[API_DOCUMENTATION.md](API_DOCUMENTATION.md)** - Complete API reference
+- **[DOCKER.md](DOCKER.md)** - Docker setup and usage
 
-**User Features:**
-- Add new payment cards with full details
-- View all their cards
-- Update card details (name, expiry date)
-- Delete their cards
-- Set default card
-- Card number masking for security
+---
 
-**Admin Features:**
-- View all payment cards in system
-- Update any card
-- Delete any card
-- Enable/disable cards
-- Toggle card status
+## 🎯 What is This Service?
 
-## Technology Stack
-- Java 17
-- Spring Boot 3.2.6
-- Spring Data JPA
-- MySQL Database
-- Lombok
-- Maven
+This service manages **payment options/methods** - allowing users and admins to manage saved payment cards.
 
-## Database Setup
+**Your University Topic:** Payment Methods Management
 
-### Option 1: Automatic Setup (Windows)
+### What This Service Does
+
+✅ Users can add their payment cards  
+✅ Users can edit/delete their cards  
+✅ Admin can view all payment cards  
+✅ Admin can manage any card  
+✅ Card details stored securely (masked)  
+✅ Support multiple card types (Visa, Mastercard, Amex)  
+✅ RESTful API with JSON  
+✅ MySQL database  
+✅ Docker support
+
+### What This Service Does NOT Do
+
+❌ Process actual payments  
+❌ Record payment transactions  
+❌ Payment history tracking  
+❌ Order management
+
+**Focus:** This is about managing payment OPTIONS, not processing payments  
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Java 17+
+- Maven 3.9+
+- MySQL 8.0
+
+### Setup & Run
+
 ```bash
-cd database
-setup_mysql.bat
-```
-
-### Option 2: Manual Setup
-```bash
+# 1. Setup database
 mysql -u root -p < database/create_database.sql
-```
 
-The database includes three tables:
-1. `payments` - Main payment transactions
-2. `saved_payment_methods` - Saved card details (last 4 digits)
-3. `payment_cards` - Full card management (your part)
+# 2. Configure password in application.properties
+# Edit: src/main/resources/application.properties
 
-## Configuration
-
-Update `src/main/resources/application.properties` with your database credentials:
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/payment_management_db
-spring.datasource.username=your_username
-spring.datasource.password=your_password
-```
-
-## Running the Application
-
-```bash
-# Using Maven wrapper
+# 3. Run application
 ./mvnw spring-boot:run
 
-# Or using Maven
-mvn spring-boot:run
+# 4. Test
+curl http://localhost:8085/api/payment-methods
 ```
 
-The service will start on `http://localhost:8085`
+**Service URL:** http://localhost:8085
 
-## Existing API Endpoints
+---
 
-### Payment Endpoints (`/api/payments`)
+## 📚 Documentation
 
-#### Create Payment
-```http
-POST /api/payments
-Content-Type: application/json
+| Document | Description |
+|----------|-------------|
+| **SYSTEM_OVERVIEW.md** | System architecture, database ER diagrams |
+| **SYSTEM_ARCHITECTURE.md** | File structure, component explanations |
+| **SYSTEM_FLOWS.md** | Data flows, API workflows, diagrams |
+| **API_DOCUMENTATION.md** | API endpoints, examples |
+| **DOCKER.md** | Docker configuration |
 
-{
-  "orderId": "ORD-001",
-  "customerName": "John Doe",
-  "amount": 150.00,
-  "method": "CARD",
-  "status": "COMPLETED",
-  "paymentDate": "2024-01-15",
-  "txnRef": "TXN-12345"
-}
+---
+
+## 🔌 API Endpoints
+
+### Payment Methods (Your Topic)
+```
+GET    /api/payment-methods           - Get all saved cards
+GET    /api/payment-methods/{id}      - Get specific card
+POST   /api/payment-methods           - Add new card
+PUT    /api/payment-methods/{id}      - Update card details
+DELETE /api/payment-methods/{id}      - Delete card
 ```
 
-#### List Payments
-```http
-GET /api/payments?search=John&status=COMPLETED&page=0&size=10
+**Base URL:** `http://localhost:8085`
+
+**What these endpoints do:**
+- Users can manage their own payment cards
+- Admin can manage all payment cards
+- Store card information securely
+- Enable/disable cards
+
+See [API_DOCUMENTATION.md](API_DOCUMENTATION.md) for details.
+
+---
+
+## 💾 Database
+
+### Tables (Your Topic)
+
+1. **saved_payment_methods** - Main table for saved cards
+   - Stores card holder name, last 4 digits, expiry, brand
+   - Used by both users and admin
+
+2. **payment_cards** - Detailed card information
+   - Stores full card details (for demo purposes)
+   - User-specific cards
+
+**Note:** No payment transaction tables - this service only manages payment OPTIONS, not actual payments.
+
+See [SYSTEM_OVERVIEW.md](SYSTEM_OVERVIEW.md) for complete ER diagrams.
+
+---
+
+## 🏗️ Architecture
+
+```
+Controller → Service → Repository → Database
 ```
 
-#### Get Payment
-```http
-GET /api/payments/{paymentId}
+**Tech Stack:**
+- Spring Boot 3.2.6
+- Java 17
+- MySQL 8.0
+- JPA/Hibernate
+- Maven
+
+See [SYSTEM_ARCHITECTURE.md](SYSTEM_ARCHITECTURE.md) for details.
+
+---
+
+## 🐳 Docker
+
+```bash
+# Build
+docker build -t payment-service .
+
+# Run
+docker run -d -p 8085:8085 \
+  -e SPRING_DATASOURCE_PASSWORD=0904 \
+  payment-service
 ```
 
-#### Update Payment
-```http
-PUT /api/payments/{paymentId}
-```
+See [DOCKER.md](DOCKER.md) for complete guide.
 
-#### Update Status
-```http
-PATCH /api/payments/{paymentId}/status?status=COMPLETED
-```
+---
 
-#### Verify Payment
-```http
-POST /api/payments/{paymentId}/verify
-```
+## 🎓 For University Project
 
-#### Delete Payment
-```http
-DELETE /api/payments/{paymentId}
-```
+**Your Topic:** Payment Methods/Options Management
 
-#### Get Summary
-```http
-GET /api/payments/summary?fromDate=2024-01-01&toDate=2024-12-31
-```
+**What You're Demonstrating:**
+- How users can save and manage their payment cards
+- How admin can view and manage all cards
+- Secure card storage (masking sensitive data)
+- RESTful API design
+- Spring Boot backend development
+- Database design for payment methods
 
-### Saved Payment Method Endpoints (`/api/payment-methods`)
+**Key Points for Presentation:**
+1. **User Features** - Add, edit, delete their own cards
+2. **Admin Features** - Manage all cards in the system
+3. **Security** - Card number masking, only last 4 digits shown
+4. **Architecture** - Layered design (Controller → Service → Repository)
+5. **Database** - Proper schema for storing payment methods
 
-#### Add Method
-```http
-POST /api/payment-methods
-Content-Type: application/json
+**Technologies:**
+- Spring Boot REST API
+- JPA/Hibernate ORM
+- MySQL database
+- Docker containerization
 
-{
-  "customerName": "John Doe",
-  "type": "Card",
-  "cardHolderName": "John Doe",
-  "last4": "0366",
-  "expiryMonth": 12,
-  "expiryYear": 2026,
-  "brand": "Visa",
-  "status": "ACTIVE"
-}
-```
+---
 
-#### List Methods
-```http
-GET /api/payment-methods
-```
-
-#### Update Method
-```http
-PUT /api/payment-methods/{id}
-```
-
-#### Set Status
-```http
-PATCH /api/payment-methods/{id}/status?status=DISABLED
-```
-
-#### Delete Method
-```http
-DELETE /api/payment-methods/{id}
-```
-
-## Your Task: Card Management Implementation
-
-You need to create the following components in the `com.starbag.Payment_Management_Service` package:
-
-### 1. Entity (`entity/PaymentCard.java`)
-```java
-@Entity
-@Table(name = "payment_cards")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
-public class PaymentCard {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    private Long userId;
-    private String cardHolderName;
-    private String cardNumber; // Store encrypted or full number
-    private String expiryDate; // MM/YYYY format
-    private String cvv;
-    private String cardType; // Visa, Mastercard, etc.
-    private Boolean isDefault;
-    private Boolean isActive;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-}
-```
-
-### 2. Repository (`repo/PaymentCardRepository.java`)
-```java
-public interface PaymentCardRepository extends JpaRepository<PaymentCard, Long> {
-    List<PaymentCard> findByUserId(Long userId);
-    Optional<PaymentCard> findByCardNumber(String cardNumber);
-    boolean existsByCardNumber(String cardNumber);
-}
-```
-
-### 3. DTOs (`dto/`)
-- `CardRequest.java` - For adding cards
-- `CardUpdateRequest.java` - For updating cards
-- `CardResponse.java` - For returning card data (with masked number)
-- `AdminCardUpdateRequest.java` - For admin updates
-
-### 4. Service (`service/PaymentCardService.java`)
-Implement business logic for:
-- Adding cards
-- Updating cards
-- Deleting cards
-- Setting default card
-- Admin operations
-
-### 5. Controllers (`controller/`)
-- `UserCardController.java` - User endpoints (`/api/user/cards`)
-- `AdminCardController.java` - Admin endpoints (`/api/admin/cards`)
-
-### Required Endpoints
-
-**User Endpoints:**
-- `POST /api/user/cards` - Add card
-- `GET /api/user/cards/user/{userId}` - Get user's cards
-- `GET /api/user/cards/{cardId}/user/{userId}` - Get specific card
-- `PUT /api/user/cards/{cardId}/user/{userId}` - Update card
-- `DELETE /api/user/cards/{cardId}/user/{userId}` - Delete card
-- `PUT /api/user/cards/{cardId}/user/{userId}/set-default` - Set default
-
-**Admin Endpoints:**
-- `GET /api/admin/cards` - Get all cards
-- `PUT /api/admin/cards/{cardId}` - Update any card
-- `DELETE /api/admin/cards/{cardId}` - Delete any card
-- `PUT /api/admin/cards/{cardId}/toggle-status` - Toggle active status
-
-### Security Considerations
-
-1. **Card Number Masking**: Always return masked card numbers in responses (e.g., "**** **** **** 1234")
-2. **CVV Security**: Never return CVV in API responses
-3. **User Authorization**: Verify user owns the card before operations
-4. **Input Validation**: Validate card number format, expiry date, CVV
-5. **Duplicate Prevention**: Check for duplicate card numbers
-
-### Testing
-
-Sample test data is provided in `database/create_database.sql`. You can test with:
-- User ID: 1 (has 2 cards)
-- User ID: 2 (has 1 card)
-
-## Project Structure
-```
-src/main/java/com/starbag/Payment_Management_Service/
-├── config/              # Configuration classes
-├── controller/          # REST controllers
-│   ├── PaymentController.java
-│   ├── SavedMethodController.java
-│   ├── UserCardController.java (TO CREATE)
-│   └── AdminCardController.java (TO CREATE)
-├── dto/                 # Data transfer objects
-├── entity/              # JPA entities
-│   ├── Payment.java
-│   ├── SavedPaymentMethod.java
-│   └── PaymentCard.java (TO CREATE)
-├── exception/           # Custom exceptions
-├── repo/                # JPA repositories
-│   ├── PaymentRepository.java
-│   ├── SavedMethodRepository.java
-│   └── PaymentCardRepository.java (TO CREATE)
-└── service/             # Business logic
-    ├── PaymentService.java
-    ├── SavedMethodService.java
-    └── PaymentCardService.java (TO CREATE)
-```
-
-## Error Handling
-
-The service provides detailed error responses:
-- 400 Bad Request - Validation errors
-- 403 Forbidden - Unauthorized access
-- 404 Not Found - Resource not found
-- 409 Conflict - Duplicate resource
-- 500 Internal Server Error - Server errors
-
-## Development Tips
-
-1. Follow the existing code structure and patterns
-2. Use Lombok annotations (@Getter, @Setter, @Builder, etc.)
-3. Add proper validation annotations (@NotNull, @NotBlank, @Pattern)
-4. Implement proper exception handling
-5. Test all CRUD operations thoroughly
-6. Ensure card numbers are properly masked in responses
-7. Add indexes to database columns for better performance
-
-## Next Steps
-
-1. Create the entity, repository, DTOs, service, and controllers as outlined above
-2. Test the endpoints using Postman or cURL
-3. Integrate with your frontend application
-4. Add additional security measures as needed
-5. Consider adding encryption for sensitive card data
-
-Good luck with your university project!
+**Port:** 8085  
+**Database:** payment_management_db  
+**Topic:** Payment Methods Management (NOT payment processing)  
+**Tech:** Spring Boot + Java 17 + MySQL 8.0
