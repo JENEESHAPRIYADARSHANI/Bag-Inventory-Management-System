@@ -1,3 +1,4 @@
+
 # Multi-stage build for React application
 
 # Stage 1: Build
@@ -38,3 +39,22 @@ HEALTHCHECK --interval=30s --timeout=3s \
 
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]
+=======
+FROM node:18-alpine AS build
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm install
+
+COPY . .
+RUN npm run build
+
+FROM nginx:alpine
+
+COPY --from=build /app/dist /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
+

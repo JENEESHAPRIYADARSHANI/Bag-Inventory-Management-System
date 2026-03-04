@@ -1,7 +1,7 @@
-package com.starbags.payment.repo;
+package com.starbag.Payment_Management_Service.repo;
 
-import com.starbags.payment.entity.Payment;
-import com.starbags.payment.entity.enums.PaymentStatus;
+import com.starbag.Payment_Management_Service.entity.Payment;
+import com.starbag.Payment_Management_Service.entity.enums.PaymentStatus;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
@@ -16,7 +16,7 @@ public interface PaymentRepository extends JpaRepository<Payment, String>, JpaSp
     @Query("""
            select coalesce(sum(p.amount), 0)
            from Payment p
-           where p.status = com.starbags.payment.entity.enums.PaymentStatus.COMPLETED
+           where p.status = com.starbag.Payment_Management_Service.entity.enums.PaymentStatus.COMPLETED
            and (:from is null or p.paymentDate >= :from)
            and (:to is null or p.paymentDate <= :to)
            """)

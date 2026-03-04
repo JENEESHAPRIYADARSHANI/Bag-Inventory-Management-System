@@ -1,6 +1,6 @@
-package com.starbags.payment.entity;
+package com.starbag.Payment_Management_Service.entity;
 
-import com.starbags.payment.entity.enums.MethodStatus;
+import com.starbag.Payment_Management_Service.entity.enums.MethodStatus;
 import jakarta.persistence.*;
 import lombok.*;
 

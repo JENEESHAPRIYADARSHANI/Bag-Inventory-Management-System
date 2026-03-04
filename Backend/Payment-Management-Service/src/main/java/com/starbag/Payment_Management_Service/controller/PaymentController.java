@@ -1,10 +1,10 @@
-package com.starbags.payment.controller;
+package com.starbag.Payment_Management_Service.controller;
 
-import com.starbags.payment.dto.*;
-import com.starbags.payment.entity.Payment;
-import com.starbags.payment.entity.enums.PaymentMethod;
-import com.starbags.payment.entity.enums.PaymentStatus;
-import com.starbags.payment.service.PaymentService;
+import com.starbag.Payment_Management_Service.dto.*;
+import com.starbag.Payment_Management_Service.entity.Payment;
+import com.starbag.Payment_Management_Service.entity.enums.PaymentMethod;
+import com.starbag.Payment_Management_Service.entity.enums.PaymentStatus;
+import com.starbag.Payment_Management_Service.service.PaymentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

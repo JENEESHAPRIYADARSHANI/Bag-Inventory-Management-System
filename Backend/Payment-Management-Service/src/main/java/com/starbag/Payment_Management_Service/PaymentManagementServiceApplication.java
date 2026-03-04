@@ -1,12 +1,12 @@
 //payment service application entry point
-package com.starbags.payment;
+package com.starbag.Payment_Management_Service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class PaymentServiceApplication {
+public class PaymentManagementServiceApplication {
     public static void main(String[] args) {
-        SpringApplication.run(PaymentServiceApplication.class, args);
+        SpringApplication.run(PaymentManagementServiceApplication.class, args);
     }
 }

@@ -1,7 +1,7 @@
-package com.starbags.payment.dto;
+package com.starbag.Payment_Management_Service.dto;
 
-import com.starbags.payment.entity.enums.PaymentMethod;
-import com.starbags.payment.entity.enums.PaymentStatus;
+import com.starbag.Payment_Management_Service.entity.enums.PaymentMethod;
+import com.starbag.Payment_Management_Service.entity.enums.PaymentStatus;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
