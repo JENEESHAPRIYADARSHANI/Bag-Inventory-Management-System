@@ -1,0 +1,29 @@
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: supplier-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}   # from your local environment
+      MYSQL_DATABASE: supplier_material_db
+    ports:
+      - "3307:3306"  # host:container mapping to avoid port conflict
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  supplier-service:
+    build: .
+    container_name: supplier-service
+    restart: always
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/supplier_material_db
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}  # from your local environment
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}  # from your local environment
+
+volumes:
+  mysql_data:
