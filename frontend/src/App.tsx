@@ -8,6 +8,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import { QuotationProvider } from "@/contexts/QuotationContext";
 import { PaymentProvider } from "@/contexts/PaymentContext";
 import { TrackingProvider } from "@/contexts/TrackingContext";
+import { InventoryProvider } from "@/contexts/InventoryContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { SupplierProvider } from "./contexts/SupplierContext";
 // Admin Pages
@@ -17,7 +18,6 @@ import Orders from "./pages/Orders";
 import Products from "./pages/Products";
 import Production from "./pages/Production";
 import Suppliers from "./pages/Suppliers";
-// import Inventory from "./pages/Inventory";
 import Payments from "./pages/Payments";
 
 // Auth Pages
@@ -104,14 +104,6 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-      {/* <Route
-        path="/inventory"
-        element={
-          <ProtectedRoute allowedRoles={["admin"]}>
-            <Inventory />
-          </ProtectedRoute>
-        }
-      /> */}
       <Route
         path="/suppliers"
         element={
@@ -202,8 +194,6 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-
-      {/* ✅ Payment Methods Route */}
       <Route
         path="/user/payment-methods"
         element={
