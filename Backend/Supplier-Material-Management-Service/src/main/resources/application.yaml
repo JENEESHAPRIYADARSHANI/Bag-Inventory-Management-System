@@ -3,9 +3,9 @@ server:
 
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3307/supplier_material_db}
-    username: ${SPRING_DATASOURCE_USERNAME:root}
-    password: ${SPRING_DATASOURCE_PASSWORD:root}
+    url: ${DB_URL:jdbc:mysql://host.docker.internal:3306/supplier_material_db}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:yourpassword}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -16,7 +16,3 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
     open-in-view: false
-
-  jackson:
-    serialization:
-      FAIL_ON_EMPTY_BEANS: false
