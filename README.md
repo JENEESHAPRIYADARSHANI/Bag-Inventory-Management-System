@@ -1,1 +1,0 @@
-# Bag-Inventory-Management-System
