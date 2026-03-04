@@ -223,24 +223,20 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
-        <CartProvider>
-          <QuotationProvider>
-            <InventoryProvider>
         <SupplierProvider>
           <CartProvider>
             <QuotationProvider>
-              <PaymentProvider>
-                <TrackingProvider>
-                  <Toaster />
-                  <Sonner />
-                  <BrowserRouter>
-                    <AppRoutes />
-                  </BrowserRouter>
-                </TrackingProvider>
-              </PaymentProvider>
-            </InventoryProvider>
-          </QuotationProvider>
-        </CartProvider>
+              <InventoryProvider>
+                <PaymentProvider>
+                  <TrackingProvider>
+                    <Toaster />
+                    <Sonner />
+                    <BrowserRouter>
+                      <AppRoutes />
+                    </BrowserRouter>
+                  </TrackingProvider>
+                </PaymentProvider>
+              </InventoryProvider>
             </QuotationProvider>
           </CartProvider>
         </SupplierProvider>
