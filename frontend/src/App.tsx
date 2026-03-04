@@ -6,11 +6,10 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { QuotationProvider } from "@/contexts/QuotationContext";
-import { InventoryProvider } from "@/contexts/InventoryContext";
 import { PaymentProvider } from "@/contexts/PaymentContext";
 import { TrackingProvider } from "@/contexts/TrackingContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-
+import { SupplierProvider } from "./contexts/SupplierContext";
 // Admin Pages
 import Index from "./pages/Index";
 import Customers from "./pages/Customers";
@@ -18,7 +17,7 @@ import Orders from "./pages/Orders";
 import Products from "./pages/Products";
 import Production from "./pages/Production";
 import Suppliers from "./pages/Suppliers";
-import Inventory from "./pages/Inventory";
+// import Inventory from "./pages/Inventory";
 import Payments from "./pages/Payments";
 
 // Auth Pages
@@ -105,14 +104,14 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-      <Route
+      {/* <Route
         path="/inventory"
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
             <Inventory />
           </ProtectedRoute>
         }
-      />
+      /> */}
       <Route
         path="/suppliers"
         element={
@@ -227,6 +226,9 @@ const App = () => (
         <CartProvider>
           <QuotationProvider>
             <InventoryProvider>
+        <SupplierProvider>
+          <CartProvider>
+            <QuotationProvider>
               <PaymentProvider>
                 <TrackingProvider>
                   <Toaster />
@@ -239,6 +241,9 @@ const App = () => (
             </InventoryProvider>
           </QuotationProvider>
         </CartProvider>
+            </QuotationProvider>
+          </CartProvider>
+        </SupplierProvider>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>

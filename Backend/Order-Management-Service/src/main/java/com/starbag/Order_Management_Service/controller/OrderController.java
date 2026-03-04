@@ -2,7 +2,7 @@ package com.starbag.Order_Management_Service.controller;
 
 import com.starbag.Order_Management_Service.domain.Order;
 import com.starbag.Order_Management_Service.domain.OrderStatus;
-import com.starbag.Order_Management_Service.service.impl.OrderService;
+import com.starbag.Order_Management_Service.service.OrderService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
