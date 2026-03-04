@@ -1,31 +1,32 @@
+// Backend uses uppercase with underscores
 export type DeliveryStatus =
-  | "order_confirmed"
-  | "processing"
-  | "packed"
-  | "shipped"
-  | "out_for_delivery"
-  | "delivered"
-  | "failed"
-  | "cancelled";
+  | "ORDER_CONFIRMED"
+  | "PROCESSING"
+  | "PACKED"
+  | "SHIPPED"
+  | "OUT_FOR_DELIVERY"
+  | "DELIVERED"
+  | "FAILED"
+  | "CANCELLED";
 
 export const DELIVERY_STATUS_LABELS: Record<DeliveryStatus, string> = {
-  order_confirmed: "Order Confirmed",
-  processing: "Processing",
-  packed: "Packed",
-  shipped: "Shipped",
-  out_for_delivery: "Out for Delivery",
-  delivered: "Delivered",
-  failed: "Failed",
-  cancelled: "Cancelled",
+  ORDER_CONFIRMED: "Order Confirmed",
+  PROCESSING: "Processing",
+  PACKED: "Packed",
+  SHIPPED: "Shipped",
+  OUT_FOR_DELIVERY: "Out for Delivery",
+  DELIVERED: "Delivered",
+  FAILED: "Failed",
+  CANCELLED: "Cancelled",
 };
 
 export const DELIVERY_STATUS_ORDER: DeliveryStatus[] = [
-  "order_confirmed",
-  "processing",
-  "packed",
-  "shipped",
-  "out_for_delivery",
-  "delivered",
+  "ORDER_CONFIRMED",
+  "PROCESSING",
+  "PACKED",
+  "SHIPPED",
+  "OUT_FOR_DELIVERY",
+  "DELIVERED",
 ];
 
 export interface StatusHistoryEntry {

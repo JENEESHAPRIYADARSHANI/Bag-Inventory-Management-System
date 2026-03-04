@@ -90,8 +90,6 @@ public class DeliveryTrackingController {
         return ResponseEntity.noContent().build();
     }
 
-
-
     // ========== HISTORY & TIMELINE ENDPOINTS ==========
 
     // Get tracking history
