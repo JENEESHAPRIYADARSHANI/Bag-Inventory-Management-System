@@ -9,82 +9,67 @@ public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long orderId;
+    @Column(name = "order_id")
+    private Long id;
 
+    @Column(name = "customer_id", nullable = false)
     private Long customerId;
 
-    // For your current design (comma-separated). Works for your assignment.
+    @Column(name = "customer_name")
+    private String customerName;
+
+    @Column(name = "total_amount")
+    private Double totalAmount;
+
+    @Column(name = "delivery_date")
+    private LocalDateTime deliveryDate;
+
+    @Column(name = "product_ids", columnDefinition = "TEXT")
     private String productIds;
 
+    @Column(name = "quantities", columnDefinition = "TEXT")
     private String quantities;
 
+    @Column(name = "order_date")
     private LocalDateTime orderDate;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "status")
     private OrderStatus status;
 
-    // NEW: Store previous status for cancel reject flow
     @Enumerated(EnumType.STRING)
+    @Column(name = "previous_status")
     private OrderStatus previousStatus;
 
-    // Default constructor required by JPA
     public Order() {}
 
-    // Getter and Setter methods for all fields
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public Long getOrderId() {
-        return orderId;
-    }
+    public Long getCustomerId() { return customerId; }
+    public void setCustomerId(Long customerId) { this.customerId = customerId; }
 
-    public void setOrderId(Long orderId) {
-        this.orderId = orderId;
-    }
+    public String getCustomerName() { return customerName; }
+    public void setCustomerName(String customerName) { this.customerName = customerName; }
 
-    public Long getCustomerId() {
-        return customerId;
-    }
+    public Double getTotalAmount() { return totalAmount; }
+    public void setTotalAmount(Double totalAmount) { this.totalAmount = totalAmount; }
 
-    public void setCustomerId(Long customerId) {
-        this.customerId = customerId;
-    }
+    public LocalDateTime getDeliveryDate() { return deliveryDate; }
+    public void setDeliveryDate(LocalDateTime deliveryDate) { this.deliveryDate = deliveryDate; }
 
-    public String getProductIds() {
-        return productIds;
-    }
+    public String getProductIds() { return productIds; }
+    public void setProductIds(String productIds) { this.productIds = productIds; }
 
-    public void setProductIds(String productIds) {
-        this.productIds = productIds;
-    }
+    public String getQuantities() { return quantities; }
+    public void setQuantities(String quantities) { this.quantities = quantities; }
 
-    public String getQuantities() {
-        return quantities;
-    }
+    public LocalDateTime getOrderDate() { return orderDate; }
+    public void setOrderDate(LocalDateTime orderDate) { this.orderDate = orderDate; }
 
-    public void setQuantities(String quantities) {
-        this.quantities = quantities;
-    }
+    public OrderStatus getStatus() { return status; }
+    public void setStatus(OrderStatus status) { this.status = status; }
 
-    public LocalDateTime getOrderDate() {
-        return orderDate;
-    }
-
-    public void setOrderDate(LocalDateTime orderDate) {
-        this.orderDate = orderDate;
-    }
-
-    public OrderStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(OrderStatus status) {
-        this.status = status;
-    }
-
-    public OrderStatus getPreviousStatus() {
-        return previousStatus;
-    }
-
-    public void setPreviousStatus(OrderStatus previousStatus) {
-        this.previousStatus = previousStatus;
-    }
+    public OrderStatus getPreviousStatus() { return previousStatus; }
+    public void setPreviousStatus(OrderStatus previousStatus) { this.previousStatus = previousStatus; }
 }
