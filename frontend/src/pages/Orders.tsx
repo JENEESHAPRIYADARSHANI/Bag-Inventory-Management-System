@@ -1,91 +1,76 @@
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Filter, ArrowUpDown } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Plus, Search, Filter, ArrowUpDown, Package, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import * as quotationApi from "@/services/quotationApi";
+import { toast } from "sonner";
 
-const orders = [
-  {
-    id: "ORD-001",
-    customer: "Tech Solutions Ltd",
-    products: "Executive Laptop Bag x100",
-    totalAmount: "$12,500",
-    status: "completed",
-    paymentStatus: "paid",
-    orderDate: "Jan 15, 2026",
-    deliveryDate: "Jan 22, 2026",
-  },
-  {
-    id: "ORD-002",
-    customer: "Global Corp Inc",
-    products: "Corporate Messenger x75",
-    totalAmount: "$8,750",
-    status: "processing",
-    paymentStatus: "pending",
-    orderDate: "Jan 14, 2026",
-    deliveryDate: "Jan 25, 2026",
-  },
-  {
-    id: "ORD-003",
-    customer: "Innovate Hub",
-    products: "Premium Backpack Pro x120",
-    totalAmount: "$15,200",
-    status: "pending",
-    paymentStatus: "pending",
-    orderDate: "Jan 13, 2026",
-    deliveryDate: "Feb 01, 2026",
-  },
-  {
-    id: "ORD-004",
-    customer: "Digital Wave Co",
-    products: "Business Travel Set x50",
-    totalAmount: "$6,800",
-    status: "completed",
-    paymentStatus: "paid",
-    orderDate: "Jan 12, 2026",
-    deliveryDate: "Jan 19, 2026",
-  },
-  {
-    id: "ORD-005",
-    customer: "NextGen Enterprises",
-    products: "Elite Briefcase x200",
-    totalAmount: "$22,100",
-    status: "processing",
-    paymentStatus: "partial",
-    orderDate: "Jan 11, 2026",
-    deliveryDate: "Jan 30, 2026",
-  },
-  {
-    id: "ORD-006",
-    customer: "Prime Industries",
-    products: "Executive Laptop Bag x150",
-    totalAmount: "$18,750",
-    status: "shipped",
-    paymentStatus: "paid",
-    orderDate: "Jan 10, 2026",
-    deliveryDate: "Jan 18, 2026",
-  },
-];
+interface OrderItem {
+  id: number;
+  productId: number;
+  quantity: number;
+  unitPrice: number;
+  discount: number;
+}
 
-const statusStyles = {
-  completed: "bg-success/10 text-success border-success/20",
-  processing: "bg-info/10 text-info border-info/20",
-  pending: "bg-warning/10 text-warning border-warning/20",
-  shipped: "bg-primary/10 text-primary border-primary/20",
-};
+interface Order {
+  id: number;
+  quotationId: number;
+  customerId: string;
+  email: string;
+  companyName: string;
+  contactPerson: string;
+  totalAmount: number;
+  status: string;
+  items: OrderItem[];
+}
 
-const paymentStyles = {
-  paid: "bg-success/10 text-success border-success/20",
-  pending: "bg-warning/10 text-warning border-warning/20",
-  partial: "bg-info/10 text-info border-info/20",
+const statusStyles: Record<string, string> = {
+  CONFIRMED: "bg-success/10 text-success border-success/20",
+  PROCESSING: "bg-info/10 text-info border-info/20",
+  PENDING: "bg-warning/10 text-warning border-warning/20",
+  SHIPPED: "bg-primary/10 text-primary border-primary/20",
+  COMPLETED: "bg-success/10 text-success border-success/20",
 };
 
 const Orders = () => {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const loadOrders = async () => {
+    try {
+      setLoading(true);
+      const data = await quotationApi.getAllOrders();
+      setOrders(data);
+    } catch (error) {
+      console.error("Failed to load orders:", error);
+      toast.error("Failed to load orders");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadOrders();
+  }, []);
+
+  const filteredOrders = orders.filter(
+    (order) =>
+      order.id.toString().includes(searchTerm) ||
+      order.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.contactPerson.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <DashboardLayout
       title="Orders"
-      subtitle="Manage and track all corporate orders"
+      subtitle="Manage and track all orders converted from quotations"
     >
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-6">
@@ -95,99 +80,137 @@ const Orders = () => {
             <Input
               placeholder="Search orders..."
               className="pl-10 bg-muted/50 border-transparent focus:border-primary"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Button variant="outline" size="icon">
-            <Filter className="h-4 w-4" />
+          <Button variant="outline" size="icon" onClick={loadOrders} title="Refresh">
+            <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
           </Button>
         </div>
-        <Button className="btn-gradient gap-2">
-          <Plus className="h-4 w-4" />
-          New Order
-        </Button>
       </div>
 
+      {/* Loading State */}
+      {loading && (
+        <Card className="border-border">
+          <CardContent className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <RefreshCw className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
+              <p className="text-muted-foreground">Loading orders...</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Empty State */}
+      {!loading && filteredOrders.length === 0 && (
+        <Card className="border-border">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Package className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="font-semibold text-foreground mb-2">No orders yet</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              {searchTerm
+                ? "No orders match your search"
+                : "Orders will appear here when quotations are converted"}
+            </p>
+            {searchTerm && (
+              <Button variant="outline" onClick={() => setSearchTerm("")}>
+                Clear Search
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Orders Table */}
-      <div className="rounded-xl border border-border bg-card overflow-hidden animate-fade-in">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-muted/50">
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  <button className="flex items-center gap-2 hover:text-foreground transition-colors">
-                    Order ID
-                    <ArrowUpDown className="h-3 w-3" />
-                  </button>
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Customer
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Products
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Amount
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Status
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Payment
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Delivery
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {orders.map((order, index) => (
-                <tr
-                  key={order.id}
-                  className="group hover:bg-muted/30 transition-colors"
-                >
-                  <td className="px-6 py-4 text-sm font-semibold text-primary">
-                    {order.id}
-                  </td>
-                  <td className="px-6 py-4 text-sm font-medium text-foreground">
-                    {order.customer}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-muted-foreground max-w-[200px] truncate">
-                    {order.products}
-                  </td>
-                  <td className="px-6 py-4 text-sm font-semibold text-foreground">
-                    {order.totalAmount}
-                  </td>
-                  <td className="px-6 py-4">
-                    <Badge
-                      variant="outline"
-                      className={cn(
-                        "capitalize font-medium",
-                        statusStyles[order.status as keyof typeof statusStyles]
-                      )}
-                    >
-                      {order.status}
-                    </Badge>
-                  </td>
-                  <td className="px-6 py-4">
-                    <Badge
-                      variant="outline"
-                      className={cn(
-                        "capitalize font-medium",
-                        paymentStyles[order.paymentStatus as keyof typeof paymentStyles]
-                      )}
-                    >
-                      {order.paymentStatus}
-                    </Badge>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-muted-foreground">
-                    {order.deliveryDate}
-                  </td>
+      {!loading && filteredOrders.length > 0 && (
+        <div className="rounded-xl border border-border bg-card overflow-hidden animate-fade-in">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border bg-muted/50">
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <button className="flex items-center gap-2 hover:text-foreground transition-colors">
+                      Order ID
+                      <ArrowUpDown className="h-3 w-3" />
+                    </button>
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Quotation ID
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Company
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Contact
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Email
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Items
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Amount
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Status
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {filteredOrders.map((order) => (
+                  <tr
+                    key={order.id}
+                    className="group hover:bg-muted/30 transition-colors"
+                  >
+                    <td className="px-6 py-4 text-sm font-semibold text-primary">
+                      ORD-{order.id}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">
+                      QT-{order.quotationId}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-medium text-foreground">
+                      {order.companyName}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">
+                      {order.contactPerson}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">
+                      {order.email}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">
+                      {order.items?.length || 0} item(s)
+                    </td>
+                    <td className="px-6 py-4 text-sm font-semibold text-foreground">
+                      ${order.totalAmount.toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4">
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "capitalize font-medium",
+                          statusStyles[order.status] || "bg-muted/10 text-muted-foreground border-muted/20"
+                        )}
+                      >
+                        {order.status.toLowerCase()}
+                      </Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Summary */}
+      {!loading && filteredOrders.length > 0 && (
+        <div className="mt-4 text-sm text-muted-foreground">
+          Showing {filteredOrders.length} order(s)
+          {searchTerm && ` matching "${searchTerm}"`}
+        </div>
+      )}
     </DashboardLayout>
   );
 };

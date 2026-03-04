@@ -41,6 +41,7 @@ import { toast } from "sonner";
 const statusConfig: Record<QuotationStatus, { label: string; icon: typeof Clock; className: string }> = {
   draft: { label: "Draft", icon: Clock, className: "bg-warning/10 text-warning border-warning/20" },
   approved: { label: "Approved", icon: CheckCircle, className: "bg-success/10 text-success border-success/20" },
+  accepted: { label: "Accepted", icon: CheckCircle, className: "bg-info/10 text-info border-info/20" },
   rejected: { label: "Rejected", icon: XCircle, className: "bg-destructive/10 text-destructive border-destructive/20" },
   converted: { label: "Converted", icon: ArrowRightLeft, className: "bg-primary/10 text-primary border-primary/20" },
 };
@@ -88,14 +89,28 @@ const AdminQuotations = () => {
     setIsDetailOpen(false);
   };
 
-  const handleApprove = () => {
+  const handleApprove = async () => {
     if (!selectedQuotation) return;
     if (editingItems) {
-      updateQuotation(selectedQuotation.id, { items: editingItems, adminNotes });
+      await updateQuotation(selectedQuotation.id, { items: editingItems, adminNotes });
     }
-    updateQuotationStatus(selectedQuotation.id, "approved");
-    toast.success("Quotation approved");
+    await updateQuotationStatus(selectedQuotation.id, "approved");
+    toast.success("Quotation approved and sent to customer");
     setIsDetailOpen(false);
+  };
+
+  const handleAcceptAndConvert = async () => {
+    if (!selectedQuotation) return;
+    try {
+      // First accept the quotation
+      await updateQuotationStatus(selectedQuotation.id, "accepted");
+      // Then convert to order
+      await convertToOrder(selectedQuotation.id);
+      toast.success("Quotation accepted and converted to order");
+      setIsDetailOpen(false);
+    } catch (error) {
+      console.error("Failed to accept and convert:", error);
+    }
   };
 
   const openRejectDialog = () => {
@@ -228,12 +243,22 @@ const AdminQuotations = () => {
                           <Button variant="ghost" size="sm" onClick={() => openDetail(q)}>
                             <Eye className="h-4 w-4" />
                           </Button>
-                          {q.status === "approved" && (
+                          {(q.status === "approved" || q.status === "accepted") && (
                             <Button
                               variant="ghost"
                               size="sm"
                               className="text-primary"
-                              onClick={() => handleConvert(q)}
+                              onClick={async () => {
+                                if (q.status === "approved") {
+                                  // Accept first, then convert
+                                  await updateQuotationStatus(q.id, "accepted");
+                                  await convertToOrder(q.id);
+                                } else {
+                                  // Already accepted, just convert
+                                  handleConvert(q);
+                                }
+                              }}
+                              title={q.status === "approved" ? "Accept & Convert to Order" : "Convert to Order"}
                             >
                               <ArrowRightLeft className="h-4 w-4" />
                             </Button>
@@ -380,11 +405,25 @@ const AdminQuotations = () => {
                 </Button>
                 <Button className="btn-gradient gap-1" onClick={handleApprove}>
                   <CheckCircle className="h-4 w-4" />
-                  Approve
+                  Approve & Send
                 </Button>
               </>
             )}
             {selectedQuotation?.status === "approved" && (
+              <>
+                <Button variant="outline" onClick={() => setIsDetailOpen(false)}>
+                  Close
+                </Button>
+                <Button
+                  className="btn-gradient gap-1"
+                  onClick={handleAcceptAndConvert}
+                >
+                  <ArrowRightLeft className="h-4 w-4" />
+                  Accept & Convert to Order
+                </Button>
+              </>
+            )}
+            {selectedQuotation?.status === "accepted" && (
               <Button
                 className="btn-gradient gap-1"
                 onClick={() => {
@@ -394,6 +433,11 @@ const AdminQuotations = () => {
               >
                 <ArrowRightLeft className="h-4 w-4" />
                 Convert to Order
+              </Button>
+            )}
+            {(selectedQuotation?.status === "converted" || selectedQuotation?.status === "rejected") && (
+              <Button variant="outline" onClick={() => setIsDetailOpen(false)}>
+                Close
               </Button>
             )}
           </DialogFooter>

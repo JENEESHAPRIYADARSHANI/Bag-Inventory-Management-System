@@ -4,8 +4,8 @@ spring:
   datasource:
     # database connection details
     url: jdbc:mysql://localhost:3307/starbag_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
-    username: root
-    password: "@Abishek2001"
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     show-sql: true

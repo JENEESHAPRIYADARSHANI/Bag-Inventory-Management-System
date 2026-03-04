@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8882/inventory";
+const BASE_URL = "http://localhost:8081";
 
 export async function fetchInventory() {
   const res = await fetch(BASE_URL);
