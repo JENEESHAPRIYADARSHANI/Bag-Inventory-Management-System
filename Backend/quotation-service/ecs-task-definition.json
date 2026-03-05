@@ -1,0 +1,71 @@
+{
+  "family": "quotation-service-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::468284644046:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "quotation-service",
+      "image": "468284644046.dkr.ecr.us-east-1.amazonaws.com/quotation-service:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "SPRING_PROFILES_ACTIVE",
+          "value": "cloud"
+        },
+        {
+          "name": "SPRING_DATASOURCE_USERNAME",
+          "value": "admin"
+        },
+        {
+          "name": "SPRING_DATASOURCE_DRIVER_CLASS_NAME",
+          "value": "com.mysql.cj.jdbc.Driver"
+        },
+        {
+          "name": "SPRING_JPA_HIBERNATE_DDL_AUTO",
+          "value": "update"
+        },
+        {
+          "name": "SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT",
+          "value": "org.hibernate.dialect.MySQLDialect"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "SPRING_DATASOURCE_URL",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:468284644046:secret:quotation-db-url-eozzeL"
+        },
+        {
+          "name": "SPRING_DATASOURCE_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:468284644046:secret:quotation-db-password-d8l7sL"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/quotation-service",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://localhost:8080/api/quotations/products || exit 1"
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 90
+      }
+    }
+  ]
+}

@@ -1,38 +1,33 @@
 package com.example.quotation_service.service;
 
-import com.example.quotation_service.client.OrderClient;
+import com.example.quotation_service.client.OrderServiceClient;
 import com.example.quotation_service.client.ProductClient;
 import com.example.quotation_service.dto.*;
-import com.example.quotation_service.model.Order;
-import com.example.quotation_service.model.OrderItem;
 import com.example.quotation_service.model.Quotation;
 import com.example.quotation_service.model.QuotationItem;
-import com.example.quotation_service.repository.OrderRepository;
 import com.example.quotation_service.repository.QuotationRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class QuotationService {
 
     private final QuotationRepository quotationRepository;
-    private final OrderRepository orderRepository;
     private final ProductClient productClient;
-    private final OrderClient orderClient;
+    private final OrderServiceClient orderServiceClient;
 
     public QuotationService(QuotationRepository quotationRepository,
-            OrderRepository orderRepository,
             ProductClient productClient,
-            OrderClient orderClient) {
+            OrderServiceClient orderServiceClient) {
         this.quotationRepository = quotationRepository;
-        this.orderRepository = orderRepository;
         this.productClient = productClient;
-        this.orderClient = orderClient;
+        this.orderServiceClient = orderServiceClient;
     }
 
     public List<ProductDto> getProducts() {
@@ -147,60 +142,53 @@ public class QuotationService {
 
     @Transactional
     public Quotation convertToOrder(Long id) {
-        Quotation quotation = quotationRepository.findById(id).orElseThrow();
+        Quotation quotation = quotationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Quotation not found"));
 
         if (!"ACCEPTED".equals(quotation.getStatus())) {
-            throw new RuntimeException("Only ACCEPTED quotations can be converted");
+            throw new RuntimeException("Only ACCEPTED quotations can be converted to orders");
         }
 
-        // Create order locally (mock Order Service)
-        Order order = new Order();
-        order.setQuotationId(quotation.getId());
-        order.setCustomerId(quotation.getCustomerId());
-        order.setEmail(quotation.getEmail());
-        order.setCompanyName(quotation.getCompanyName());
-        order.setContactPerson(quotation.getContactPerson());
-        order.setTotalAmount(quotation.getTotalAmount());
-        order.setStatus("CONFIRMED");
-
-        // Copy items from quotation to order
-        for (QuotationItem qItem : quotation.getItems()) {
-            OrderItem orderItem = new OrderItem();
-            orderItem.setOrder(order);
-            orderItem.setProductId(qItem.getProductId());
-            orderItem.setQuantity(qItem.getQuantity());
-            orderItem.setUnitPrice(qItem.getUnitPrice());
-            orderItem.setDiscount(qItem.getDiscount());
-            order.getItems().add(orderItem);
-        }
-
-        // Save order locally
-        orderRepository.save(order);
-
-        // Try to send to external Order Service (optional, will fail silently if not available)
+        // Prepare order request for Order Management Service
+        CreateOrderRequest orderRequest = new CreateOrderRequest();
+        
+        // Parse customerId to Long (Order Service expects Long)
         try {
-            OrderRequestDto orderRequest = new OrderRequestDto();
-            orderRequest.setQuotationId(quotation.getId());
-            orderRequest.setCustomerId(quotation.getCustomerId());
-            orderRequest.setTotalAmount(quotation.getTotalAmount());
-
-            List<OrderRequestDto.OrderItemDto> orderItems = new ArrayList<>();
-            for (QuotationItem qItem : quotation.getItems()) {
-                OrderRequestDto.OrderItemDto oItem = new OrderRequestDto.OrderItemDto();
-                oItem.setProductId(qItem.getProductId());
-                oItem.setQuantity(qItem.getQuantity());
-                oItem.setUnitPrice(qItem.getUnitPrice());
-                oItem.setDiscount(qItem.getDiscount());
-                orderItems.add(oItem);
-            }
-            orderRequest.setItems(orderItems);
-
-            orderClient.createOrder(orderRequest);
-        } catch (Exception e) {
-            // External Order Service not available, order saved locally only
+            orderRequest.setCustomerId(Long.parseLong(quotation.getCustomerId()));
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("Invalid customer ID format: " + quotation.getCustomerId());
         }
+        
+        // Convert quotation items to comma-separated format expected by Order Service
+        String productIds = quotation.getItems().stream()
+                .map(item -> String.valueOf(item.getProductId()))
+                .collect(Collectors.joining(","));
+        
+        String quantities = quotation.getItems().stream()
+                .map(item -> String.valueOf(item.getQuantity()))
+                .collect(Collectors.joining(","));
+        
+        orderRequest.setProductIds(productIds);
+        orderRequest.setQuantities(quantities);
+        orderRequest.setOrderDate(LocalDateTime.now());
+        orderRequest.setStatus("PENDING");  // Initial status in Order Service
 
-        quotation.setStatus("CONVERTED");
-        return quotationRepository.save(quotation);
+        try {
+            // Call Order Management Service to create the order
+            OrderResponseDto orderResponse = orderServiceClient.createOrder(orderRequest);
+            
+            // Update quotation with order reference
+            quotation.setOrderId(orderResponse.getOrderId());
+            quotation.setStatus("CONVERTED");
+            
+            return quotationRepository.save(quotation);
+            
+        } catch (Exception e) {
+            // Log the error and throw a meaningful exception
+            throw new RuntimeException(
+                "Failed to convert quotation to order. Order Management Service may be unavailable: " 
+                + e.getMessage(), e
+            );
+        }
     }
 }

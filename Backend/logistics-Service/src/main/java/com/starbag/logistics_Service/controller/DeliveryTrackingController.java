@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/tracking")
+@RequestMapping("/api/v1/logistics")
 @RequiredArgsConstructor
 @CrossOrigin
 public class DeliveryTrackingController {

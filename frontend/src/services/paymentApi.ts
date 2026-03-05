@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8085/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://13.61.184.129:8085";
 const API_DEBUG = import.meta.env.VITE_API_DEBUG === 'true';
 
 // Create axios instance with default config
@@ -101,7 +101,7 @@ export interface SavedMethodResponse {
 export const paymentApi = {
   // Create payment
   createPayment: async (data: PaymentRequest): Promise<PaymentResponse> => {
-    const response = await api.post('/payments', data);
+    const response = await api.post('/api/payments', data);
     return response.data;
   },
 
@@ -116,25 +116,25 @@ export const paymentApi = {
     size?: number;
     sort?: string;
   }): Promise<PageResponse<PaymentResponse>> => {
-    const response = await api.get('/payments', { params });
+    const response = await api.get('/api/payments', { params });
     return response.data;
   },
 
   // Get payment by ID
   getPayment: async (paymentId: string): Promise<PaymentResponse> => {
-    const response = await api.get(`/payments/${paymentId}`);
+    const response = await api.get(`/api/payments/${paymentId}`);
     return response.data;
   },
 
   // Update payment
   updatePayment: async (paymentId: string, data: Partial<PaymentRequest>): Promise<PaymentResponse> => {
-    const response = await api.put(`/payments/${paymentId}`, data);
+    const response = await api.put(`/api/payments/${paymentId}`, data);
     return response.data;
   },
 
   // Update payment status
   updatePaymentStatus: async (paymentId: string, status: 'PENDING' | 'COMPLETED' | 'FAILED'): Promise<PaymentResponse> => {
-    const response = await api.patch(`/payments/${paymentId}/status`, null, {
+    const response = await api.patch(`/api/payments/${paymentId}/status`, null, {
       params: { status }
     });
     return response.data;
@@ -142,18 +142,18 @@ export const paymentApi = {
 
   // Verify payment
   verifyPayment: async (paymentId: string): Promise<PaymentResponse> => {
-    const response = await api.post(`/payments/${paymentId}/verify`);
+    const response = await api.post(`/api/payments/${paymentId}/verify`);
     return response.data;
   },
 
   // Delete payment
   deletePayment: async (paymentId: string): Promise<void> => {
-    await api.delete(`/payments/${paymentId}`);
+    await api.delete(`/api/payments/${paymentId}`);
   },
 
   // Get payment summary
   getSummary: async (fromDate?: string, toDate?: string): Promise<PaymentSummary> => {
-    const response = await api.get('/payments/summary', {
+    const response = await api.get('/api/payments/summary', {
       params: { fromDate, toDate }
     });
     return response.data;
@@ -169,7 +169,7 @@ export const paymentApi = {
     page?: number;
     size?: number;
   }): Promise<PageResponse<PaymentResponse>> => {
-    const response = await api.get('/payments/history', { params });
+    const response = await api.get('/api/payments/history', { params });
     return response.data;
   },
 };
@@ -178,25 +178,25 @@ export const paymentApi = {
 export const savedMethodApi = {
   // Add saved method
   addMethod: async (data: SavedMethodRequest): Promise<SavedMethodResponse> => {
-    const response = await api.post('/payment-methods', data);
+    const response = await api.post('/api/payment-methods', data);
     return response.data;
   },
 
   // Get all saved methods
   getMethods: async (): Promise<SavedMethodResponse[]> => {
-    const response = await api.get('/payment-methods');
+    const response = await api.get('/api/payment-methods');
     return response.data;
   },
 
   // Update saved method
   updateMethod: async (id: number, data: Partial<SavedMethodRequest>): Promise<SavedMethodResponse> => {
-    const response = await api.put(`/payment-methods/${id}`, data);
+    const response = await api.put(`/api/payment-methods/${id}`, data);
     return response.data;
   },
 
   // Set method status
   setMethodStatus: async (id: number, status: 'ACTIVE' | 'DISABLED'): Promise<SavedMethodResponse> => {
-    const response = await api.patch(`/payment-methods/${id}/status`, null, {
+    const response = await api.patch(`/api/payment-methods/${id}/status`, null, {
       params: { status }
     });
     return response.data;
@@ -204,7 +204,7 @@ export const savedMethodApi = {
 
   // Delete saved method
   deleteMethod: async (id: number): Promise<void> => {
-    await api.delete(`/payment-methods/${id}`);
+    await api.delete(`/api/payment-methods/${id}`);
   },
 };
 

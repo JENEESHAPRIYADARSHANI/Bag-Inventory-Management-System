@@ -37,6 +37,10 @@ public class Quotation {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    // Reference to order in Order Management Service (not the order itself)
+    @Column(name = "order_id")
+    private Long orderId;
+
     @OneToMany(mappedBy = "quotation", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<QuotationItem> items = new ArrayList<>();
 }

@@ -2,7 +2,9 @@ import axios from 'axios';
 import { Quotation, QuotationItem } from '@/types/quotation';
 
 // Backend API base URL - Update this to match your backend server
-const API_BASE_URL = 'http://localhost:8080/api';
+// Local development: 'http://localhost:8080/api'
+// AWS Production: 'http://3.227.243.51:8080/api'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://3.227.243.51:8080/api';
 
 // Create axios instance with default config
 const api = axios.create({
