@@ -1,4 +1,4 @@
-package com.starbags.payment.entity.enums;
+package com.starbag.Payment_Management_Service.entity.enums;
 
 public enum PaymentMethod {
     CARD,

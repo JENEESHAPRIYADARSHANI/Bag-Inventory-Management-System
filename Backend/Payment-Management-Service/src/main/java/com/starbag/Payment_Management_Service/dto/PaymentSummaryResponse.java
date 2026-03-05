@@ -1,4 +1,4 @@
-package com.starbags.payment.dto;
+package com.starbag.Payment_Management_Service.dto;
 
 import lombok.*;
 import java.math.BigDecimal;

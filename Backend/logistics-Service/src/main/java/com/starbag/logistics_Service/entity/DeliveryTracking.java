@@ -1,5 +1,6 @@
 package com.starbag.logistics_Service.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -47,6 +48,7 @@ public class DeliveryTracking {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "deliveryTracking", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<TrackingHistory> trackingHistory;
 
     @PrePersist

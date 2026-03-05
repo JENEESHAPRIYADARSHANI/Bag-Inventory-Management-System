@@ -8,6 +8,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import { QuotationProvider } from "@/contexts/QuotationContext";
 import { PaymentProvider } from "@/contexts/PaymentContext";
 import { TrackingProvider } from "@/contexts/TrackingContext";
+import { InventoryProvider } from "@/contexts/InventoryContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { SupplierProvider } from "./contexts/SupplierContext";
 // Admin Pages
@@ -17,7 +18,6 @@ import Orders from "./pages/Orders";
 import Products from "./pages/Products";
 import Production from "./pages/Production";
 import Suppliers from "./pages/Suppliers";
-// import Inventory from "./pages/Inventory";
 import Payments from "./pages/Payments";
 
 // Auth Pages
@@ -35,6 +35,7 @@ import UserProfile from "./pages/user/Profile";
 import RequestQuotation from "./pages/user/RequestQuotation";
 import UserQuotations from "./pages/user/Quotations";
 import UserTracking from "./pages/user/Tracking";
+import UserPaymentMethods from "@/pages/user/UserPaymentMethods";
 
 import NotFound from "./pages/NotFound";
 
@@ -103,14 +104,6 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-      {/* <Route
-        path="/inventory"
-        element={
-          <ProtectedRoute allowedRoles={["admin"]}>
-            <Inventory />
-          </ProtectedRoute>
-        }
-      /> */}
       <Route
         path="/suppliers"
         element={
@@ -201,6 +194,14 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/user/payment-methods"
+        element={
+          <ProtectedRoute allowedRoles={["user"]}>
+            <UserPaymentMethods />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Catch-all */}
       <Route path="*" element={<NotFound />} />
@@ -215,15 +216,17 @@ const App = () => (
         <SupplierProvider>
           <CartProvider>
             <QuotationProvider>
-              <PaymentProvider>
-                <TrackingProvider>
-                  <Toaster />
-                  <Sonner />
-                  <BrowserRouter>
-                    <AppRoutes />
-                  </BrowserRouter>
-                </TrackingProvider>
-              </PaymentProvider>
+              <InventoryProvider>
+                <PaymentProvider>
+                  <TrackingProvider>
+                    <Toaster />
+                    <Sonner />
+                    <BrowserRouter>
+                      <AppRoutes />
+                    </BrowserRouter>
+                  </TrackingProvider>
+                </PaymentProvider>
+              </InventoryProvider>
             </QuotationProvider>
           </CartProvider>
         </SupplierProvider>

@@ -15,14 +15,12 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
 
-    // Exact allowed lifecycle transitions
     private static final Map<OrderStatus, Set<OrderStatus>> ALLOWED_LIFECYCLE_TRANSITIONS = Map.of(
             OrderStatus.PENDING, Set.of(OrderStatus.CONFIRMED),
             OrderStatus.CONFIRMED, Set.of(OrderStatus.PROCESSING),
             OrderStatus.PROCESSING, Set.of(OrderStatus.COMPLETED)
     );
 
-    // From these statuses, a user can request cancellation
     private static final Set<OrderStatus> CANCELLABLE_STATUSES =
             EnumSet.of(OrderStatus.PENDING, OrderStatus.CONFIRMED, OrderStatus.PROCESSING);
 
@@ -30,7 +28,7 @@ public class OrderService {
         this.orderRepository = orderRepository;
     }
 
-    // CREATE ORDER (always starts as PENDING)
+    // ✅ CREATE ORDER (always starts as PENDING)
     public Order createOrder(Order order) {
         order.setOrderDate(LocalDateTime.now());
         order.setStatus(OrderStatus.PENDING);
@@ -38,47 +36,47 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    // GET ALL
+    // ✅ USER: get orders for customer
+    public List<Order> getOrdersForCustomer(Long customerId) {
+        return orderRepository.findByCustomerId(customerId);
+    }
+
+    // ✅ GET ALL
     public List<Order> getAllOrders() {
         return orderRepository.findAll();
     }
 
-    // FILTER BY STATUS
+    // ✅ FILTER BY STATUS
     public List<Order> getOrdersByStatus(OrderStatus status) {
         return orderRepository.findByStatus(status);
     }
 
-    // GET ONE
+    // ✅ GET ONE
     public Order getOrder(Long id) {
         return findOrderById(id);
     }
 
-    // ADMIN: UPDATE LIFECYCLE STATUS (ONLY PENDING→CONFIRMED→PROCESSING→COMPLETED)
+    // ✅ ADMIN: UPDATE LIFECYCLE STATUS
     public Order updateStatus(Long id, OrderStatus newStatus) {
         Order order = findOrderById(id);
         OrderStatus current = order.getStatus();
 
-        // Closed orders cannot change
         if (current == OrderStatus.COMPLETED || current == OrderStatus.CANCELLED) {
             throw new InvalidOrderTransitionException("Order is closed. Cannot change status from " + current);
         }
 
-        // While cancel is pending review, only approve/reject endpoints can change it
         if (current == OrderStatus.CANCEL_REQUESTED) {
             throw new InvalidOrderTransitionException("Order is CANCEL_REQUESTED. Use cancel-approve or cancel-reject.");
         }
 
-        // Prevent setting cancel states via updateStatus endpoint
         if (newStatus == OrderStatus.CANCEL_REQUESTED || newStatus == OrderStatus.CANCELLED) {
             throw new InvalidOrderTransitionException("Use cancel endpoints to handle cancellations.");
         }
 
-        // Enforce exact lifecycle transitions (no skipping)
         Set<OrderStatus> allowedNext = ALLOWED_LIFECYCLE_TRANSITIONS.getOrDefault(current, Collections.emptySet());
         if (!allowedNext.contains(newStatus)) {
             throw new InvalidOrderTransitionException(
-                    "Invalid transition: " + current + " → " + newStatus +
-                            ". Allowed: " + allowedNext
+                    "Invalid transition: " + current + " → " + newStatus + ". Allowed: " + allowedNext
             );
         }
 
@@ -86,7 +84,7 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    // USER: REQUEST CANCEL (ONLY from PENDING/CONFIRMED/PROCESSING)
+    // ✅ USER: REQUEST CANCEL
     public Order requestCancel(Long id) {
         Order order = findOrderById(id);
         OrderStatus current = order.getStatus();
@@ -100,7 +98,7 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    // ADMIN: APPROVE CANCELLATION (ONLY when CANCEL_REQUESTED)
+    // ✅ ADMIN: APPROVE CANCELLATION
     public Order approveCancellation(Long id) {
         Order order = findOrderById(id);
 
@@ -109,11 +107,10 @@ public class OrderService {
         }
 
         order.setStatus(OrderStatus.CANCELLED);
-        // keep previousStatus for audit OR clear it if you prefer
         return orderRepository.save(order);
     }
 
-    // ADMIN: REJECT CANCELLATION (ONLY when CANCEL_REQUESTED) → revert to previousStatus
+    // ✅ ADMIN: REJECT CANCELLATION
     public Order rejectCancellation(Long id) {
         Order order = findOrderById(id);
 

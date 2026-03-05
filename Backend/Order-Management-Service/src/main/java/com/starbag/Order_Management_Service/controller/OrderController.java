@@ -2,6 +2,8 @@ package com.starbag.Order_Management_Service.controller;
 
 import com.starbag.Order_Management_Service.domain.Order;
 import com.starbag.Order_Management_Service.domain.OrderStatus;
+import com.starbag.Order_Management_Service.dto.OrderDto;
+import com.starbag.Order_Management_Service.mapper.OrderMapper;
 import com.starbag.Order_Management_Service.service.OrderService;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,56 +14,60 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
+    private final OrderMapper orderMapper;
 
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, OrderMapper orderMapper) {
         this.orderService = orderService;
+        this.orderMapper = orderMapper;
     }
 
-    // CREATE ORDER
+    // ✅ CREATE (user checkout)
     @PostMapping
-    public Order createOrder(@RequestBody Order order) {
-        return orderService.createOrder(order);
+    public OrderDto create(@RequestBody OrderDto dto) {
+        Order order = orderMapper.fromDto(dto);
+        Order saved = orderService.createOrder(order);
+        return orderMapper.toDto(saved);
     }
 
-    // VIEW ALL ORDERS (Admin) + FILTER BY STATUS
-    // GET /orders  OR  GET /orders?status=PENDING
+    // ✅ ADMIN: GET ALL
     @GetMapping
-    public List<Order> getOrders(@RequestParam(required = false) OrderStatus status) {
-        if (status == null) {
-            return orderService.getAllOrders();
-        }
-        return orderService.getOrdersByStatus(status);
+    public List<OrderDto> getAll() {
+        return orderService.getAllOrders().stream().map(orderMapper::toDto).toList();
     }
 
-    // VIEW ONE ORDER
+    // ✅ GET ONE
     @GetMapping("/{id}")
-    public Order getOrder(@PathVariable Long id) {
-        return orderService.getOrder(id);
+    public OrderDto getOne(@PathVariable Long id) {
+        return orderMapper.toDto(orderService.getOrder(id));
     }
 
-    // UPDATE STATUS (Admin)
-    // Example: PUT /orders/1?status=CONFIRMED
+    // ✅ USER: GET BY CUSTOMER
+    @GetMapping("/customer/{customerId}")
+    public List<OrderDto> getOrdersForCustomer(@PathVariable Long customerId) {
+        return orderService.getOrdersForCustomer(customerId).stream().map(orderMapper::toDto).toList();
+    }
+
+    // ✅ ADMIN: UPDATE STATUS
     @PutMapping("/{id}")
-    public Order updateStatus(@PathVariable Long id,
-                              @RequestParam OrderStatus status) {
-        return orderService.updateStatus(id, status);
+    public OrderDto updateStatus(@PathVariable Long id, @RequestParam OrderStatus status) {
+        return orderMapper.toDto(orderService.updateStatus(id, status));
     }
 
-    // USER REQUEST CANCEL
+    // ✅ USER: CANCEL REQUEST
     @PutMapping("/{id}/cancel-request")
-    public Order requestCancel(@PathVariable Long id) {
-        return orderService.requestCancel(id);
+    public OrderDto cancelRequest(@PathVariable Long id) {
+        return orderMapper.toDto(orderService.requestCancel(id));
     }
 
-    // ADMIN APPROVE CANCELLATION
+    // ✅ ADMIN: CANCEL APPROVE
     @PutMapping("/{id}/cancel-approve")
-    public Order approveCancel(@PathVariable Long id) {
-        return orderService.approveCancellation(id);
+    public OrderDto cancelApprove(@PathVariable Long id) {
+        return orderMapper.toDto(orderService.approveCancellation(id));
     }
 
-    // ADMIN REJECT CANCELLATION
+    // ✅ ADMIN: CANCEL REJECT
     @PutMapping("/{id}/cancel-reject")
-    public Order rejectCancel(@PathVariable Long id) {
-        return orderService.rejectCancellation(id);
+    public OrderDto cancelReject(@PathVariable Long id) {
+        return orderMapper.toDto(orderService.rejectCancellation(id));
     }
 }

@@ -1,6 +1,6 @@
-package com.starbags.payment.entity;
+package com.starbag.Payment_Management_Service.entity;
 
-import com.starbags.payment.entity.enums.MethodStatus;
+import com.starbag.Payment_Management_Service.entity.enums.MethodStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,8 +25,8 @@ public class SavedPaymentMethod {
     @Column(nullable = false, length = 120)
     private String cardHolderName;
 
-    // Security: store only last 4 digits
-    @Column(nullable = false, length = 4)
+    // Security: store only last 4 digits (encrypted, so needs more space)
+    @Column(nullable = false, length = 500)
     private String last4;
 
     @Column(nullable = false)

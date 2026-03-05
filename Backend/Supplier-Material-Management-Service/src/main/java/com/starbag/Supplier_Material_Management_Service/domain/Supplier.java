@@ -3,6 +3,9 @@ package com.starbag.Supplier_Material_Management_Service.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+
+@Getter
+@Setter
 @Entity
 @Table(name = "suppliers")
 @Data

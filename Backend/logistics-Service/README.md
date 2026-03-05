@@ -1,6 +1,6 @@
 # 📦 Logistics Service - Delivery Tracking System
 
-A complete RESTful backend service for managing delivery tracking and logistics operations. Built with Spring Boot 4.0.2, featuring real-time status tracking, comprehensive history management, and a robust MySQL database.
+A complete RESTful backend service for managing delivery tracking and logistics operations. Built with Spring Boot 4.0.2, featuring real-time status tracking, comprehensive history management, and ready for frontend integration.
 
 ---
 
@@ -10,6 +10,7 @@ A complete RESTful backend service for managing delivery tracking and logistics 
 - **Auto-generated Tracking IDs** - Unique tracking numbers for every delivery
 - **Status History Tracking** - Full audit trail with @OneToMany relationship
 - **Advanced Search & Filtering** - Search by order ID, customer name, status, and date ranges
+- **CORS Enabled** - Ready for frontend integration
 - **Dual Interface** - Separate endpoints for admin operations and customer tracking
 - **Cascade Operations** - Automatic history management with JPA relationships
 - **Real-time Updates** - Track delivery status changes with timestamps
@@ -34,19 +35,16 @@ A complete RESTful backend service for managing delivery tracking and logistics 
 
 ## 📋 Prerequisites
 
-Before running this project, ensure you have:
-
-- **Java 17** or higher installed
-- **MySQL 8.0+** or XAMPP with MySQL
+- **Java 17** or higher
+- **MySQL 8.0+** or XAMPP
 - **Maven 3.x** (included via wrapper)
-- **IntelliJ IDEA** (recommended) or any Java IDE
-- **Insomnia/Postman** for API testing
+- **IntelliJ IDEA** (recommended)
 
 ---
 
 ## ⚡ Quick Start
 
-### 1. Clone the Repository
+### 1. Clone Repository
 
 ```bash
 git clone <repository-url>
@@ -60,76 +58,201 @@ cd database
 setup_mysql.bat
 ```
 
-Enter your MySQL root password when prompted (press Enter if no password).
+Enter your MySQL root password when prompted.
 
-### 3. Configure Database Connection
+### 3. Configure Database
 
 Edit `src/main/resources/application.yaml`:
 
 ```yaml
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/logistics_db
-    username: root
     password: YOUR_MYSQL_PASSWORD # Change this!
 ```
 
-### 4. Run the Application
+### 4. Run Application
 
-**Option A: Using IntelliJ IDEA**
+**IntelliJ IDEA:**
 
-1. Open project in IntelliJ
-2. Navigate to `LogisticsServiceApplication.java`
-3. Click the green play button ▶️
-4. Wait for "Started LogisticsServiceApplication"
+1. Open `LogisticsServiceApplication.java`
+2. Click green play button ▶️
+3. Wait for "Started LogisticsServiceApplication"
 
-**Option B: Using Maven**
+**Maven Command:**
 
 ```batch
 mvnw.cmd spring-boot:run
 ```
 
-### 5. Verify Installation
-
-Open browser or API client:
+### 5. Verify
 
 ```
 GET http://localhost:8080/api/tracking
 ```
 
-Expected response: `[]` (empty array)
+Expected: `[]` (empty array)
 
 ---
 
-## 📚 API Documentation
+## 🌐 Frontend Integration
 
-### Base URL
+### API Base URL
 
 ```
 http://localhost:8080/api/tracking
 ```
 
-### Quick API Reference
+### CORS Configuration
 
-| Method | Endpoint                               | Description             |
-| ------ | -------------------------------------- | ----------------------- |
-| POST   | `/api/tracking/create`                 | Create new tracking     |
-| GET    | `/api/tracking`                        | Get all trackings       |
-| GET    | `/api/tracking/{trackingId}`           | Get tracking by ID      |
-| GET    | `/api/tracking/{trackingId}/history`   | Get tracking history    |
-| PUT    | `/api/tracking/{trackingId}/status`    | Update delivery status  |
-| PUT    | `/api/tracking/{trackingId}`           | Update tracking details |
-| DELETE | `/api/tracking/{trackingId}`           | Delete tracking         |
-| GET    | `/api/tracking/search?query={text}`    | Search trackings        |
-| GET    | `/api/tracking/filter/status/{status}` | Filter by status        |
+✅ **CORS is already enabled** with `@CrossOrigin` annotation
+
+- Accepts requests from any origin
+- Supports all HTTP methods (GET, POST, PUT, DELETE)
+- Ready for React, Angular, Vue, or any frontend framework
+
+### Example Frontend Integration
+
+#### JavaScript/Fetch API
+
+```javascript
+// Get all trackings
+fetch("http://localhost:8080/api/tracking")
+  .then((response) => response.json())
+  .then((data) => console.log(data));
+
+// Create new tracking
+fetch("http://localhost:8080/api/tracking/create", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    orderId: "ORD-12345",
+    customerName: "John Doe",
+    deliveryAddress: "123 Main Street",
+    recipientPhone: "555-1234",
+    carrierName: "DHL",
+  }),
+})
+  .then((response) => response.json())
+  .then((data) => console.log(data));
+```
+
+#### React/Axios
+
+```javascript
+import axios from "axios";
+
+const API_BASE_URL = "http://localhost:8080/api/tracking";
+
+// Get all trackings
+const getAllTrackings = async () => {
+  const response = await axios.get(API_BASE_URL);
+  return response.data;
+};
+
+// Create tracking
+const createTracking = async (trackingData) => {
+  const response = await axios.post(`${API_BASE_URL}/create`, trackingData);
+  return response.data;
+};
+
+// Update status
+const updateStatus = async (trackingId, statusData) => {
+  const response = await axios.put(
+    `${API_BASE_URL}/${trackingId}/status`,
+    statusData,
+  );
+  return response.data;
+};
+
+// Get history
+const getHistory = async (trackingId) => {
+  const response = await axios.get(`${API_BASE_URL}/${trackingId}/history`);
+  return response.data;
+};
+```
+
+#### Angular Service
+
+```typescript
+import { Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Observable } from "rxjs";
+
+@Injectable({
+  providedIn: "root",
+})
+export class TrackingService {
+  private apiUrl = "http://localhost:8080/api/tracking";
+
+  constructor(private http: HttpClient) {}
+
+  getAllTrackings(): Observable<any[]> {
+    return this.http.get<any[]>(this.apiUrl);
+  }
+
+  createTracking(data: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/create`, data);
+  }
+
+  updateStatus(trackingId: string, data: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${trackingId}/status`, data);
+  }
+
+  getHistory(trackingId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/${trackingId}/history`);
+  }
+}
+```
+
+---
+
+## 📚 API Endpoints
+
+### Admin Operations
+
+| Method | Endpoint                            | Description              |
+| ------ | ----------------------------------- | ------------------------ |
+| POST   | `/api/tracking/create`              | Create new tracking      |
+| GET    | `/api/tracking`                     | Get all trackings        |
+| GET    | `/api/tracking/{trackingId}`        | Get tracking by ID       |
+| GET    | `/api/tracking/order/{orderId}`     | Get tracking by order ID |
+| PUT    | `/api/tracking/{trackingId}/status` | Update delivery status   |
+| PUT    | `/api/tracking/{trackingId}`        | Update tracking details  |
+| DELETE | `/api/tracking/{trackingId}`        | Delete tracking          |
+
+### History & Timeline
+
+| Method | Endpoint                                     | Description              |
+| ------ | -------------------------------------------- | ------------------------ |
+| GET    | `/api/tracking/{trackingId}/history`         | Get tracking history     |
+| GET    | `/api/tracking/{trackingId}/history/details` | Get detailed history     |
+| GET    | `/api/tracking/history/status/{status}`      | Filter history by status |
+
+### Search & Filter
+
+| Method | Endpoint                               | Description              |
+| ------ | -------------------------------------- | ------------------------ |
+| GET    | `/api/tracking/search?query={text}`    | Search by order/customer |
+| GET    | `/api/tracking/filter/status/{status}` | Filter by status         |
+| GET    | `/api/tracking/filter/date-range`      | Filter by date range     |
+
+### Customer Endpoints
+
+| Method | Endpoint                                       | Description            |
+| ------ | ---------------------------------------------- | ---------------------- |
+| GET    | `/api/tracking/customer/{customerName}`        | Get customer trackings |
+| GET    | `/api/tracking/customer/order/{orderId}`       | Get tracking by order  |
+| GET    | `/api/tracking/customer/timeline/{trackingId}` | Get tracking timeline  |
 
 For complete API documentation, see **[API_DOCUMENTATION.md](API_DOCUMENTATION.md)**
 
 ---
 
-## 🧪 Testing the API
+## 🧪 API Testing Examples
 
-### Create a New Tracking
+### Create Tracking
 
 ```http
 POST http://localhost:8080/api/tracking/create
@@ -146,7 +269,7 @@ Content-Type: application/json
 }
 ```
 
-### Update Delivery Status
+### Update Status
 
 ```http
 PUT http://localhost:8080/api/tracking/TRK-XXXXXXXX/status
@@ -160,7 +283,7 @@ Content-Type: application/json
 }
 ```
 
-### Get Tracking History
+### Get History
 
 ```http
 GET http://localhost:8080/api/tracking/TRK-XXXXXXXX/history
@@ -172,17 +295,8 @@ GET http://localhost:8080/api/tracking/TRK-XXXXXXXX/history
 
 ### Tables
 
-**delivery_tracking**
-
-- Primary table storing delivery information
-- Auto-generated tracking IDs
-- Timestamps for creation and updates
-
-**tracking_history**
-
-- Stores complete status change history
-- @ManyToOne relationship with delivery_tracking
-- Cascade delete enabled
+- **delivery_tracking** - Main delivery information
+- **tracking_history** - Status change history
 
 ### Relationship
 
@@ -197,38 +311,6 @@ USE logistics_db;
 SHOW TABLES;
 SELECT * FROM delivery_tracking;
 SELECT * FROM tracking_history;
-```
-
----
-
-## 🔧 Configuration
-
-### Application Properties
-
-Located at: `src/main/resources/application.yaml`
-
-```yaml
-spring:
-  application:
-    name: logistics-service
-
-  datasource:
-    url: jdbc:mysql://localhost:3306/logistics_db
-    username: root
-    password: root
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: update # Auto-creates tables
-    show-sql: true # Shows SQL in console
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
-        format_sql: true
-
-server:
-  port: 8080
 ```
 
 ---
@@ -257,21 +339,21 @@ logistics-Service/
 │   │   ├── java/com/starbag/logistics_Service/
 │   │   │   ├── controller/          # REST controllers
 │   │   │   ├── service/             # Business logic
-│   │   │   ├── repository/          # Data access layer
+│   │   │   ├── repository/          # Data access
 │   │   │   ├── entity/              # JPA entities
 │   │   │   ├── dto/                 # Data transfer objects
 │   │   │   ├── exception/           # Exception handlers
-│   │   │   ├── constants/           # Enums and constants
+│   │   │   ├── constants/           # Enums
 │   │   │   └── LogisticsServiceApplication.java
 │   │   └── resources/
 │   │       └── application.yaml     # Configuration
-│   └── test/                        # Test files
+│   └── test/                        # Tests
 ├── database/
-│   ├── create_database.sql          # Database creation script
+│   ├── create_database.sql          # Database script
 │   └── setup_mysql.bat              # Setup automation
 ├── pom.xml                          # Maven dependencies
 ├── README.md                        # This file
-└── API_DOCUMENTATION.md             # Complete API docs
+└── API_DOCUMENTATION.md             # API docs
 ```
 
 ---
@@ -280,96 +362,75 @@ logistics-Service/
 
 ### MySQL Connection Failed
 
-**Problem:** Application can't connect to MySQL
-
-**Solutions:**
-
-1. Ensure MySQL service is running (XAMPP or Windows Service)
+1. Ensure MySQL is running
 2. Verify database `logistics_db` exists
 3. Check password in `application.yaml`
-4. Test connection: `mysql -u root -p`
+4. Test: `mysql -u root -p`
 
 ### Port 8080 Already in Use
 
-**Problem:** Another application using port 8080
-
-**Solution:** Change port in `application.yaml`:
+Change port in `application.yaml`:
 
 ```yaml
 server:
   port: 8081
 ```
 
-### Tables Not Created
+### CORS Issues with Frontend
 
-**Problem:** Database exists but tables missing
+CORS is already enabled. If issues persist:
 
-**Solutions:**
+1. Check frontend is making requests to correct URL
+2. Verify backend is running on port 8080
+3. Check browser console for specific errors
 
-1. Verify `ddl-auto: update` in `application.yaml`
-2. Check console for Hibernate errors
-3. Restart the application
+### 500 Error on Root URL
 
-### 500 Internal Server Error on Root URL
-
-**Problem:** Error when accessing `http://localhost:8080/`
-
-**Solution:** This is normal! Use `/api/tracking` endpoints instead.
+This is normal! Use `/api/tracking` endpoints, not root `/`
 
 ---
 
-## 🧪 Testing with Insomnia/Postman
+## 🔧 Configuration
 
-1. **Import Collection** (if available) or create requests manually
-2. **Set Base URL:** `http://localhost:8080`
-3. **Test Endpoints:**
-   - Create tracking → Note the `trackingId`
-   - Update status multiple times
-   - Get history → See all status changes
-   - Delete tracking → Verify cascade delete
+### application.yaml
 
----
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
-
-## 📝 License
-
-This project is part of the Bag Inventory Management System.
-
----
-
-## 👥 Authors
-
-- **Starbag Development Team**
-
----
-
-## 📞 Support
-
-For issues and questions:
-
-- Check **[API_DOCUMENTATION.md](API_DOCUMENTATION.md)** for endpoint details
-- Review troubleshooting section above
-- Check application logs in console
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/logistics_db
+    username: root
+    password: YOUR_PASSWORD
+  jpa:
+    hibernate:
+      ddl-auto: update # Auto-creates tables
+    show-sql: true # Shows SQL in console
+server:
+  port: 8080
+```
 
 ---
 
 ## 🎯 Next Steps
 
-- [ ] Test all CRUD operations in Insomnia
-- [ ] Verify @OneToMany relationship with history tracking
+- [ ] Test all CRUD operations
+- [ ] Verify @OneToMany relationship
 - [ ] Test cascade delete operations
-- [ ] Explore search and filter endpoints
-- [ ] Review API documentation for advanced features
+- [ ] Integrate with frontend application
+- [ ] Test CORS with frontend
+- [ ] Deploy to production
 
 ---
 
-**🚀 Your logistics tracking system is ready to use!**
+## 📝 License
+
+Part of the Bag Inventory Management System.
+
+---
+
+## 👥 Authors
+
+Starbag Development Team
+
+---
+
+**🚀 Your logistics tracking system is ready for frontend integration!**

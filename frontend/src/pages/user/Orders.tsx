@@ -1,9 +1,9 @@
+import { useEffect, useState } from "react";
 import { UserLayout } from "@/components/layout/UserLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Package, Clock, CheckCircle, Truck, RefreshCw } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import * as quotationApi from "@/services/quotationApi";
 import { toast } from "sonner";
@@ -66,13 +66,11 @@ const UserOrders = () => {
     } catch (error) {
       console.error("Failed to load orders:", error);
       toast.error("Failed to load orders");
-      
-      // Fallback to localStorage
+
       const stored = localStorage.getItem("starbags_orders");
       if (stored) {
         const localOrders = JSON.parse(stored);
-        // Filter by user email if available
-        const userOrders = localOrders.filter((order: any) => 
+        const userOrders = localOrders.filter((order: any) =>
           order.email === user.email || order.userId === user.id
         );
         setOrders(userOrders.reverse());
@@ -101,18 +99,20 @@ const UserOrders = () => {
             disabled={loading}
             title="Refresh"
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           </Button>
         </div>
 
-        {loading ? (
+        {loading && (
           <Card className="border-border/50">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <RefreshCw className="h-8 w-8 animate-spin text-primary mb-2" />
               <p className="text-muted-foreground">Loading your orders...</p>
             </CardContent>
           </Card>
-        ) : orders.length === 0 ? (
+        )}
+
+        {!loading && orders.length === 0 && (
           <Card className="border-border/50">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Package className="h-12 w-12 text-muted-foreground mb-4" />
@@ -122,7 +122,9 @@ const UserOrders = () => {
               </p>
             </CardContent>
           </Card>
-        ) : (
+        )}
+
+        {!loading && orders.length > 0 && (
           <div className="space-y-4">
             {orders.map((order) => {
               const StatusIcon = statusIcons[order.status] || Package;
@@ -141,7 +143,10 @@ const UserOrders = () => {
                       </div>
                       <Badge
                         variant="outline"
-                        className={statusColors[order.status] || "bg-muted/10 text-muted-foreground border-muted/20"}
+                        className={
+                          statusColors[order.status] ||
+                          "bg-muted/10 text-muted-foreground border-muted/20"
+                        }
                       >
                         <StatusIcon className="h-3 w-3 mr-1" />
                         {order.status}
@@ -173,7 +178,9 @@ const UserOrders = () => {
                     </div>
                     <div className="mt-4 pt-4 border-t border-border flex justify-between">
                       <span className="font-medium">Total</span>
-                      <span className="font-bold text-primary">${order.totalAmount.toFixed(2)}</span>
+                      <span className="font-bold text-primary">
+                        ${order.totalAmount.toFixed(2)}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
