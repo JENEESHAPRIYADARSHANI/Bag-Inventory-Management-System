@@ -1,0 +1,167 @@
+{
+  "info": {
+    "name": "Quotation Management System",
+    "description": "Complete API collection for Quotation Management System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Get Products",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/quotations/products",
+          "host": ["{{base_url}}"],
+          "path": ["quotations", "products"]
+        },
+        "description": "Get list of available products"
+      }
+    },
+    {
+      "name": "2. Create Quotation",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "pm.environment.set(\"quotation_id\", jsonData.id);",
+              "console.log(\"Quotation ID saved: \" + jsonData.id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"customerId\": \"CUST001\",\n  \"companyName\": \"Tech Solutions Inc\",\n  \"contactPerson\": \"John Doe\",\n  \"email\": \"{{email}}\",\n  \"phone\": \"+1-555-0123\",\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"quantity\": 5\n    },\n    {\n      \"productId\": 2,\n      \"quantity\": 10\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/quotations",
+          "host": ["{{base_url}}"],
+          "path": ["quotations"]
+        },
+        "description": "Create a new quotation (User)"
+      }
+    },
+    {
+      "name": "3. Get All Quotations",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/quotations",
+          "host": ["{{base_url}}"],
+          "path": ["quotations"]
+        },
+        "description": "Get all quotations (Admin)"
+      }
+    },
+    {
+      "name": "4. Get Quotation by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/quotations/{{quotation_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["quotations", "{{quotation_id}}"]
+        },
+        "description": "Get specific quotation details"
+      }
+    },
+    {
+      "name": "5. Search Quotations by Email",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/quotations/search?email={{email}}",
+          "host": ["{{base_url}}"],
+          "path": ["quotations", "search"],
+          "query": [
+            {
+              "key": "email",
+              "value": "{{email}}"
+            }
+          ]
+        },
+        "description": "Search quotations by customer email"
+      }
+    },
+    {
+      "name": "6. Send Quotation (Admin)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"items\": [\n    {\n      \"itemId\": 1,\n      \"unitPrice\": 1199.99,\n      \"discount\": 100.00\n    },\n    {\n      \"itemId\": 2,\n      \"unitPrice\": 379.99,\n      \"discount\": 50.00\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/quotations/{{quotation_id}}/send",
+          "host": ["{{base_url}}"],
+          "path": ["quotations", "{{quotation_id}}", "send"]
+        },
+        "description": "Admin updates prices/discounts and sends to customer"
+      }
+    },
+    {
+      "name": "7. Accept Quotation (Customer)",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/quotations/{{quotation_id}}/accept",
+          "host": ["{{base_url}}"],
+          "path": ["quotations", "{{quotation_id}}", "accept"]
+        },
+        "description": "Customer accepts the quotation"
+      }
+    },
+    {
+      "name": "8. Convert to Order (Admin)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/quotations/{{quotation_id}}/convert",
+          "host": ["{{base_url}}"],
+          "path": ["quotations", "{{quotation_id}}", "convert"]
+        },
+        "description": "Admin converts accepted quotation to order"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080/api",
+      "type": "string"
+    },
+    {
+      "key": "quotation_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "email",
+      "value": "john@techsolutions.com",
+      "type": "string"
+    }
+  ]
+}
