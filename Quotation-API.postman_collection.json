@@ -1,0 +1,213 @@
+{
+	"info": {
+		"_postman_id": "quotation-api-complete",
+		"name": "Quotation Management API - Complete",
+		"description": "Complete API collection for Quotation Management System with all workable functions",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/health",
+					"host": ["{{base_url}}"],
+					"path": ["health"]
+				}
+			}
+		},
+		{
+			"name": "2. Get Products",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/products",
+					"host": ["{{base_url}}"],
+					"path": ["products"]
+				}
+			}
+		},
+		{
+			"name": "3. Create Quotation (DRAFT)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    var jsonData = pm.response.json();",
+							"    pm.environment.set(\"quotation_id\", jsonData.id);",
+							"}"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [{"key": "Content-Type", "value": "application/json"}],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"customerId\": \"123\",\n  \"companyName\": \"Test Company Ltd\",\n  \"contactPerson\": \"John Doe\",\n  \"email\": \"john@test.com\",\n  \"phone\": \"+1234567890\",\n  \"items\": [\n    {\"productId\": 1, \"quantity\": 10},\n    {\"productId\": 2, \"quantity\": 5}\n  ]\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}",
+					"host": ["{{base_url}}"]
+				}
+			}
+		},
+		{
+			"name": "4. Get All Quotations",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}",
+					"host": ["{{base_url}}"]
+				}
+			}
+		},
+		{
+			"name": "5. Get Quotation by ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/{{quotation_id}}",
+					"host": ["{{base_url}}"],
+					"path": ["{{quotation_id}}"]
+				}
+			}
+		},
+		{
+			"name": "6. Search by Email",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/search?email=john@test.com",
+					"host": ["{{base_url}}"],
+					"path": ["search"],
+					"query": [{"key": "email", "value": "john@test.com"}]
+				}
+			}
+		},
+		{
+			"name": "7. Update & Send (DRAFT → SENT)",
+			"request": {
+				"method": "PUT",
+				"header": [{"key": "Content-Type", "value": "application/json"}],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"items\": [\n    {\"itemId\": 1, \"unitPrice\": 25.50, \"discount\": 10},\n    {\"itemId\": 2, \"unitPrice\": 15.75, \"discount\": 5}\n  ]\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/{{quotation_id}}/send",
+					"host": ["{{base_url}}"],
+					"path": ["{{quotation_id}}", "send"]
+				}
+			}
+		},
+		{
+			"name": "8. Accept Quotation (SENT → ACCEPTED)",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/{{quotation_id}}/accept",
+					"host": ["{{base_url}}"],
+					"path": ["{{quotation_id}}", "accept"]
+				}
+			}
+		},
+		{
+			"name": "9. Reject Quotation (SENT → REJECTED)",
+			"request": {
+				"method": "PUT",
+				"header": [{"key": "Content-Type", "value": "application/json"}],
+				"body": {
+					"mode": "raw",
+					"raw": "\"Price too high\""
+				},
+				"url": {
+					"raw": "{{base_url}}/{{quotation_id}}/reject",
+					"host": ["{{base_url}}"],
+					"path": ["{{quotation_id}}", "reject"]
+				}
+			}
+		},
+		{
+			"name": "10. Convert to Order (ACCEPTED → CONVERTED)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/{{quotation_id}}/convert",
+					"host": ["{{base_url}}"],
+					"path": ["{{quotation_id}}", "convert"]
+				}
+			}
+		},
+		{
+			"name": "11. Delete Quotation (DRAFT/REJECTED only)",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/{{quotation_id}}",
+					"host": ["{{base_url}}"],
+					"path": ["{{quotation_id}}"]
+				}
+			}
+		},
+		{
+			"name": "12. Get Status Details",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/status/{{quotation_id}}",
+					"host": ["{{base_url}}"],
+					"path": ["status", "{{quotation_id}}"]
+				}
+			}
+		},
+		{
+			"name": "13. Get All Orders (Proxy)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/orders",
+					"host": ["{{base_url}}"],
+					"path": ["orders"]
+				}
+			}
+		},
+		{
+			"name": "14. Get Orders by Email (Proxy)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/orders/by-email?email=john@test.com",
+					"host": ["{{base_url}}"],
+					"path": ["orders", "by-email"],
+					"query": [{"key": "email", "value": "john@test.com"}]
+				}
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080/api/quotations"
+		},
+		{
+			"key": "quotation_id",
+			"value": "1"
+		}
+	]
+}

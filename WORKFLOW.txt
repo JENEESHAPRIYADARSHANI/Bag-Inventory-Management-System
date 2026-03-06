@@ -1,0 +1,158 @@
+================================================================================
+                    QUOTATION MANAGEMENT SYSTEM WORKFLOW
+================================================================================
+
+STEP 1: CUSTOMER CREATES QUOTATION
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ POST /api/quotations                                                        │
+│                                                                             │
+│ Customer Action:                                                            │
+│ • Selects products and quantities                                          │
+│ • Provides company information                                             │
+│                                                                             │
+│ System Action:                                                              │
+│ • Fetches product prices from Product Service (or uses fallback)           │
+│ • Creates quotation with zero discounts                                    │
+│ • Sets status to DRAFT                                                     │
+│                                                                             │
+│ Result: Status = DRAFT                                                     │
+│ Can Delete: YES (Admin)                                                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      ↓
+
+STEP 2: ADMIN REVIEWS & PRICES
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ PUT /api/quotations/{id}/send                                               │
+│                                                                             │
+│ Admin Action:                                                               │
+│ • Reviews quotation items                                                  │
+│ • Sets unit prices for each item                                           │
+│ • Applies discounts (0-100%)                                               │
+│ • Sends to customer                                                        │
+│                                                                             │
+│ System Action:                                                              │
+│ • Validates only DRAFT can be updated                                      │
+│ • Calculates line totals: Qty × Price × (1 - Discount/100)                │
+│ • Calculates grand total                                                   │
+│ • Changes status to SENT                                                   │
+│                                                                             │
+│ Result: Status = SENT                                                      │
+│ Can Delete: NO (Must reject first)                                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      ↓
+                    ┌─────────────────┴─────────────────┐
+                    ↓                                   ↓
+
+STEP 3a: CUSTOMER ACCEPTS              STEP 3b: CUSTOMER REJECTS
+┌──────────────────────────────────┐   ┌──────────────────────────────────┐
+│ PUT /api/quotations/{id}/accept  │   │ PUT /api/quotations/{id}/reject  │
+│                                  │   │                                  │
+│ Customer Action:                 │   │ Customer Action:                 │
+│ • Reviews quotation              │   │ • Reviews quotation              │
+│ • Accepts terms                  │   │ • Provides rejection reason      │
+│                                  │   │                                  │
+│ System Action:                   │   │ System Action:                   │
+│ • Validates status is SENT       │   │ • Validates status is SENT       │
+│ • Changes status to ACCEPTED     │   │ • Changes status to REJECTED     │
+│                                  │   │                                  │
+│ Result: Status = ACCEPTED        │   │ Result: Status = REJECTED        │
+│ Can Delete: NO                   │   │ Can Delete: YES (Admin)          │
+└──────────────────────────────────┘   └──────────────────────────────────┘
+                    ↓
+                    
+STEP 4: ADMIN CONVERTS TO ORDER
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ POST /api/quotations/{id}/convert                                           │
+│                                                                             │
+│ Admin Action:                                                               │
+│ • Reviews accepted quotation                                               │
+│ • Initiates conversion to order                                            │
+│                                                                             │
+│ System Action:                                                              │
+│ • Validates status is ACCEPTED                                             │
+│ • Validates customer ID is numeric                                         │
+│ • Creates order in local database                                          │
+│ • Sends order to Order Management Service (port 8082)                      │
+│ • Links quotation to order ID                                              │
+│ • Changes status to CONVERTED                                              │
+│                                                                             │
+│ Result: Status = CONVERTED                                                 │
+│ Can Delete: NO (Linked to order)                                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+                              DELETE FUNCTIONALITY
+================================================================================
+
+DELETE /api/quotations/{id}
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ CAN DELETE (Admin Only):                                                    │
+│ ✅ DRAFT - Quotation not yet sent to customer                              │
+│ ✅ REJECTED - Customer rejected the quotation                              │
+│                                                                             │
+│ CANNOT DELETE:                                                              │
+│ ❌ SENT - Quotation sent to customer (must reject first)                   │
+│ ❌ ACCEPTED - Customer accepted (cannot delete accepted quotes)            │
+│ ❌ CONVERTED - Linked to order (cannot delete order references)            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+                              STATUS TRANSITIONS
+================================================================================
+
+DRAFT ──────────────────────────────────────────────────────────────> SENT
+  │                                                                      │
+  │ (Admin: Update & Send)                                              │
+  │                                                                      │
+  └──> Can Delete                                    ┌─────────────────┴─────────────────┐
+                                                     │                                   │
+                                                     ↓                                   ↓
+                                                 ACCEPTED                            REJECTED
+                                                     │                                   │
+                                                     │ (Customer: Accept)                │ (Customer: Reject)
+                                                     │                                   │
+                                                     ↓                                   └──> Can Delete
+                                                 CONVERTED
+                                                     │
+                                                     │ (Admin: Convert)
+                                                     │
+                                                     └──> Cannot Delete (Linked to Order)
+
+================================================================================
+                              API ENDPOINTS SUMMARY
+================================================================================
+
+QUOTATION MANAGEMENT:
+  POST   /api/quotations                    Create quotation (DRAFT)
+  GET    /api/quotations                    Get all quotations
+  GET    /api/quotations/{id}               Get quotation by ID
+  GET    /api/quotations/search?email=      Search by email
+  PUT    /api/quotations/{id}/send          Update & send (DRAFT → SENT)
+  PUT    /api/quotations/{id}/accept        Accept (SENT → ACCEPTED)
+  PUT    /api/quotations/{id}/reject        Reject (SENT → REJECTED)
+  POST   /api/quotations/{id}/convert       Convert (ACCEPTED → CONVERTED)
+  DELETE /api/quotations/{id}               Delete (DRAFT/REJECTED only)
+  GET    /api/quotations/status/{id}        Get status details
+
+UTILITY:
+  GET    /api/quotations/health             Health check
+  GET    /api/quotations/products           Get products (with fallback)
+  GET    /api/quotations/orders             Get all orders (proxy)
+  GET    /api/quotations/orders/by-email    Get orders by email (proxy)
+
+================================================================================
+                              BUSINESS RULES
+================================================================================
+
+1. Only DRAFT quotations can be updated and sent
+2. Only SENT quotations can be accepted or rejected
+3. Only ACCEPTED quotations can be converted to orders
+4. Only DRAFT and REJECTED quotations can be deleted
+5. CONVERTED quotations cannot be deleted (linked to orders)
+6. Customer ID must be numeric for order conversion
+7. Discounts are percentages (0-100)
+8. Line total = Quantity × Unit Price × (1 - Discount/100)
+9. Total amount = Sum of all line totals
+
+================================================================================

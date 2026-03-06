@@ -13,6 +13,7 @@ export interface OrderDto {
   id?: number;
   customerId: number;
   customerName?: string | null;
+  quotationId?: number | null;
   totalAmount?: number | null;
   deliveryDate?: string | null;
   productIds: string;

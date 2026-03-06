@@ -1,4 +1,4 @@
-export type QuotationStatus = "draft" | "approved" | "accepted" | "rejected" | "converted";
+export type QuotationStatus = "draft" | "sent" | "accepted" | "converted" | "rejected";
 
 export interface QuotationItem {
   productId: string;
@@ -24,6 +24,5 @@ export interface Quotation {
   updatedAt: string;
   userId: string;
   adminNotes?: string;
-  rejectionReason?: string;
   convertedOrderId?: string;
 }
