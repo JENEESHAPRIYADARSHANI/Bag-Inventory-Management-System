@@ -115,9 +115,7 @@ public class QuotationService {
             BigDecimal qty = BigDecimal.valueOf(item.getQuantity() != null ? item.getQuantity() : 0);
 
             BigDecimal baseTotal = price.multiply(qty);
-            // Discount is a percentage (e.g., 15 means 15%)
-            BigDecimal discountMultiplier = BigDecimal.ONE.subtract(discount.divide(new BigDecimal(100)));
-            BigDecimal lineTotal = baseTotal.multiply(discountMultiplier);
+            // Discount is a percentage (e.g., 15 means 15%)`n            BigDecimal discountMultiplier = BigDecimal.ONE.subtract(discount.divide(new BigDecimal(100)));`n            BigDecimal lineTotal = baseTotal.multiply(discountMultiplier);
             if (lineTotal.compareTo(BigDecimal.ZERO) < 0) {
                 lineTotal = BigDecimal.ZERO;
             }
@@ -205,3 +203,4 @@ public class QuotationService {
         quotationRepository.deleteById(id);
     }
 }
+
