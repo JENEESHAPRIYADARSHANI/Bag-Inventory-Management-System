@@ -2,6 +2,7 @@ package com.starbag.inventory.service.impl;
 
 import com.starbag.inventory.domain.Inventory;
 import com.starbag.inventory.repository.InventoryRepository;
+import com.starbag.inventory.service.InventoryService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,6 +33,11 @@ public class InventoryServiceImpl implements InventoryService {
     public Inventory getInventoryById(Long id) {
         return inventoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Inventory not found with id " + id));
+    }
+
+    @Override
+    public void deleteInventory(Long id) {
+        inventoryRepository.deleteById(id);
     }
 
 }
