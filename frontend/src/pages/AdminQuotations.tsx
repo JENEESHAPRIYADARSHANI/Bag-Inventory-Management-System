@@ -40,14 +40,14 @@ import { toast } from "sonner";
 
 const statusConfig: Record<QuotationStatus, { label: string; icon: typeof Clock; className: string }> = {
   draft: { label: "Draft", icon: Clock, className: "bg-warning/10 text-warning border-warning/20" },
-  approved: { label: "Approved", icon: CheckCircle, className: "bg-success/10 text-success border-success/20" },
+  sent: { label: "Sent", icon: CheckCircle, className: "bg-success/10 text-success border-success/20" },
   accepted: { label: "Accepted", icon: CheckCircle, className: "bg-info/10 text-info border-info/20" },
   rejected: { label: "Rejected", icon: XCircle, className: "bg-destructive/10 text-destructive border-destructive/20" },
   converted: { label: "Converted", icon: ArrowRightLeft, className: "bg-primary/10 text-primary border-primary/20" },
 };
 
 const AdminQuotations = () => {
-  const { quotations, updateQuotation, updateQuotationStatus, deleteQuotation, convertToOrder } = useQuotations();
+  const { quotations, updateQuotation, updateAndSendQuotation, updateQuotationStatus, deleteQuotation, convertToOrder } = useQuotations();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -68,7 +68,7 @@ const AdminQuotations = () => {
   const stats = {
     total: quotations.length,
     draft: quotations.filter((q) => q.status === "draft").length,
-    approved: quotations.filter((q) => q.status === "approved").length,
+    sent: quotations.filter((q) => q.status === "sent").length,
     converted: quotations.filter((q) => q.status === "converted").length,
   };
 
@@ -90,11 +90,8 @@ const AdminQuotations = () => {
   };
 
   const handleApprove = async () => {
-    if (!selectedQuotation) return;
-    if (editingItems) {
-      await updateQuotation(selectedQuotation.id, { items: editingItems, adminNotes });
-    }
-    await updateQuotationStatus(selectedQuotation.id, "approved");
+    if (!selectedQuotation || !editingItems) return;
+    await updateAndSendQuotation(selectedQuotation.id, editingItems);
     toast.success("Quotation approved and sent to customer");
     setIsDetailOpen(false);
   };
@@ -165,7 +162,7 @@ const AdminQuotations = () => {
         {[
           { label: "Total Quotations", value: stats.total, icon: FileText, color: "bg-primary/10 text-primary" },
           { label: "Pending Review", value: stats.draft, icon: Clock, color: "bg-warning/10 text-warning" },
-          { label: "Approved", value: stats.approved, icon: CheckCircle, color: "bg-success/10 text-success" },
+          { label: "Sent", value: stats.sent, icon: CheckCircle, color: "bg-success/10 text-success" },
           { label: "Converted", value: stats.converted, icon: ArrowRightLeft, color: "bg-info/10 text-info" },
         ].map((stat) => (
           <Card key={stat.label} className="border-border">
@@ -251,13 +248,13 @@ const AdminQuotations = () => {
                           <Button variant="ghost" size="sm" onClick={() => openDetail(q)}>
                             <Eye className="h-4 w-4" />
                           </Button>
-                          {(q.status === "approved" || q.status === "accepted") && (
+                          {(q.status === "sent" || q.status === "accepted") && (
                             <Button
                               variant="ghost"
                               size="sm"
                               className="text-primary"
                               onClick={async () => {
-                                if (q.status === "approved") {
+                                if (q.status === "sent") {
                                   // Accept first, then convert
                                   await updateQuotationStatus(q.id, "accepted");
                                   await convertToOrder(q.id);
@@ -266,7 +263,7 @@ const AdminQuotations = () => {
                                   handleConvert(q);
                                 }
                               }}
-                              title={q.status === "approved" ? "Accept & Convert to Order" : "Convert to Order"}
+                              title={q.status === "sent" ? "Accept & Convert to Order" : "Convert to Order"}
                             >
                               <ArrowRightLeft className="h-4 w-4" />
                             </Button>
@@ -344,7 +341,7 @@ const AdminQuotations = () => {
                           step="0.01"
                           value={item.unitPrice}
                           onChange={(e) => handleItemPriceChange(index, "unitPrice", parseFloat(e.target.value) || 0)}
-                          disabled={selectedQuotation.status === "approved" || selectedQuotation.status === "converted"}
+                          disabled={selectedQuotation.status === "sent" || selectedQuotation.status === "converted"}
                           className="h-8 text-sm"
                         />
                       </div>
@@ -356,7 +353,7 @@ const AdminQuotations = () => {
                           max={100}
                           value={item.discount}
                           onChange={(e) => handleItemPriceChange(index, "discount", parseFloat(e.target.value) || 0)}
-                          disabled={selectedQuotation.status === "approved" || selectedQuotation.status === "converted"}
+                          disabled={selectedQuotation.status === "sent" || selectedQuotation.status === "converted"}
                           className="h-8 text-sm"
                         />
                       </div>
@@ -391,7 +388,7 @@ const AdminQuotations = () => {
                   onChange={(e) => setAdminNotes(e.target.value)}
                   placeholder="Internal notes about this quotation..."
                   rows={3}
-                  disabled={selectedQuotation.status === "approved" || selectedQuotation.status === "converted"}
+                  disabled={selectedQuotation.status === "sent" || selectedQuotation.status === "converted"}
                 />
               </div>
             </div>
@@ -417,7 +414,7 @@ const AdminQuotations = () => {
                 </Button>
               </>
             )}
-            {selectedQuotation?.status === "approved" && (
+            {selectedQuotation?.status === "sent" && (
               <>
                 <Button variant="outline" onClick={() => setIsDetailOpen(false)}>
                   Close
