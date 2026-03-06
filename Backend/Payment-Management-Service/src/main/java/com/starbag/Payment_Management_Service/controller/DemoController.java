@@ -2,7 +2,7 @@ package com.starbag.Payment_Management_Service.controller;
 
 import com.starbag.Payment_Management_Service.entity.SavedPaymentMethod;
 import com.starbag.Payment_Management_Service.repo.SavedMethodRepository;
-import com.starbag.Payment_Management_Service.service.PaymentMethodService;
+import com.starbag.Payment_Management_Service.service.KmsEncryptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +26,7 @@ public class DemoController {
     private DataSource dataSource;
     
     @Autowired
-    private PaymentMethodService paymentMethodService;
+    private KmsEncryptionService kmsEncryptionService;
     
     @Value("${spring.datasource.url}")
     private String dbUrl;
@@ -81,8 +81,8 @@ public class DemoController {
             String testData = "4111-1111-1111-1111";
             
             // Test encryption
-            String encrypted = paymentMethodService.encryptData(testData);
-            String decrypted = paymentMethodService.decryptData(encrypted);
+            String encrypted = kmsEncryptionService.encrypt(testData);
+            String decrypted = kmsEncryptionService.decrypt(encrypted);
             
             boolean encryptionWorks = testData.equals(decrypted);
             
@@ -122,8 +122,8 @@ public class DemoController {
         // Encryption check
         try {
             String test = "test-data";
-            String encrypted = paymentMethodService.encryptData(test);
-            String decrypted = paymentMethodService.decryptData(encrypted);
+            String encrypted = kmsEncryptionService.encrypt(test);
+            String decrypted = kmsEncryptionService.decrypt(encrypted);
             checks.put("encryption", test.equals(decrypted) ? "✓ PASS" : "✗ FAIL");
         } catch (Exception e) {
             checks.put("encryption", "✗ FAIL - " + e.getMessage());
