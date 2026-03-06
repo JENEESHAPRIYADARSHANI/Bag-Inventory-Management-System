@@ -62,11 +62,13 @@ const statusConfig: Record<QuotationStatus, { label: string; icon: typeof Clock;
 
 const UserQuotations = () => {
   const { user } = useAuth();
-  const { getQuotationsByUser, updateQuotation, refreshQuotations, loading } = useQuotations();
+  const { getQuotationsByUser, updateQuotation, acceptQuotation, rejectQuotation, refreshQuotations, loading } = useQuotations();
   const quotations = user ? getQuotationsByUser(user.id) : [];
   const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [editingItems, setEditingItems] = useState<QuotationItem[] | null>(null);
+  const [isAccepting, setIsAccepting] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
 
   const sorted = [...quotations].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -95,6 +97,34 @@ const UserQuotations = () => {
       setIsDetailOpen(false);
     } catch (error) {
       // Error is handled in context
+    }
+  };
+
+  const handleAcceptQuotation = async () => {
+    if (!selectedQuotation) return;
+    setIsAccepting(true);
+    try {
+      await acceptQuotation(selectedQuotation.id);
+      setIsDetailOpen(false);
+      toast.success("Quotation accepted successfully!");
+    } catch (error) {
+      toast.error("Failed to accept quotation");
+    } finally {
+      setIsAccepting(false);
+    }
+  };
+
+  const handleDeclineQuotation = async () => {
+    if (!selectedQuotation) return;
+    setIsRejecting(true);
+    try {
+      await rejectQuotation(selectedQuotation.id);
+      setIsDetailOpen(false);
+      toast.success("Quotation declined successfully!");
+    } catch (error) {
+      toast.error("Failed to decline quotation");
+    } finally {
+      setIsRejecting(false);
     }
   };
 
@@ -232,7 +262,20 @@ const UserQuotations = () => {
                         </Button>
                       )}
                       
-                      {quotation.status !== "draft" && (
+                      {quotation.status === "sent" && (
+                        <>
+                          <Button
+                            variant="outline"
+                            className="flex-1 gap-2"
+                            onClick={() => openDetail(quotation)}
+                          >
+                            <Eye className="h-4 w-4" />
+                            Review Quotation
+                          </Button>
+                        </>
+                      )}
+                      
+                      {quotation.status !== "draft" && quotation.status !== "sent" && (
                         <Button
                           variant="outline"
                           className="flex-1 gap-2"
@@ -356,6 +399,27 @@ const UserQuotations = () => {
                 <Edit className="h-4 w-4" />
                 Save Changes
               </Button>
+            )}
+            {selectedQuotation?.status === "sent" && (
+              <>
+                <Button 
+                  className="btn-gradient gap-1" 
+                  onClick={handleAcceptQuotation}
+                  disabled={isAccepting}
+                >
+                  <CheckCircle className="h-4 w-4" />
+                  {isAccepting ? "Accepting..." : "Accept Quotation"}
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  className="gap-1"
+                  onClick={handleDeclineQuotation}
+                  disabled={isRejecting}
+                >
+                  <XCircle className="h-4 w-4" />
+                  {isRejecting ? "Declining..." : "Decline"}
+                </Button>
+              </>
             )}
             <Button variant="outline" onClick={() => setIsDetailOpen(false)}>
               Close

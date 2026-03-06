@@ -10,6 +10,8 @@ interface QuotationContextType {
   updateQuotation: (id: string, updates: Partial<Quotation>) => Promise<void>;
   updateAndSendQuotation: (id: string, items: QuotationItem[]) => Promise<void>;
   updateQuotationStatus: (id: string, status: QuotationStatus, reason?: string) => Promise<void>;
+  acceptQuotation: (id: string) => Promise<void>;
+  rejectQuotation: (id: string) => Promise<void>;
   deleteQuotation: (id: string) => void;
   convertToOrder: (id: string) => Promise<string>;
   getQuotationsByUser: (userId: string) => Quotation[];
@@ -77,7 +79,16 @@ export function QuotationProvider({ children }: { children: ReactNode }) {
 
   const refreshQuotations = async () => {
     if (USE_API) {
-      await loadQuotationsFromAPI();
+      try {
+        // Don't set loading state for refresh to avoid UI blocking
+        console.log('Refreshing quotations...');
+        const data = await quotationApi.getAllQuotations();
+        console.log('Quotations refreshed:', data.length, 'items');
+        setQuotations(data);
+      } catch (error) {
+        console.error('Failed to refresh quotations:', error);
+        // Don't show error toast for background refresh
+      }
     }
   };
 
@@ -123,7 +134,7 @@ export function QuotationProvider({ children }: { children: ReactNode }) {
   const updateAndSendQuotation = async (id: string, items: QuotationItem[]) => {
     if (USE_API) {
       try {
-        setLoading(true);
+        // Don't set global loading - this is for admin use
         await quotationApi.updateAndSendQuotation(id, items);
         await refreshQuotations();
         toast.success('Quotation updated and sent successfully');
@@ -131,8 +142,6 @@ export function QuotationProvider({ children }: { children: ReactNode }) {
         console.error('Failed to update and send quotation:', error);
         toast.error('Failed to update and send quotation');
         throw error;
-      } finally {
-        setLoading(false);
       }
     }
   };
@@ -140,13 +149,32 @@ export function QuotationProvider({ children }: { children: ReactNode }) {
   const updateQuotation = async (id: string, updates: Partial<Quotation>) => {
     if (USE_API) {
       try {
-        setLoading(true);
+        // Don't set global loading - use individual button loading states instead
         
         // If updating items, send to backend
         if (updates.items) {
           // Use updateQuotationOnly for user updates (doesn't change status)
           await quotationApi.updateQuotationOnly(id, updates.items);
-          await refreshQuotations();
+          
+          // Optimistically update the UI
+          setQuotations((prev) =>
+            prev.map((q) => {
+              if (q.id !== id) return q;
+              const { subtotal, totalAmount } = calculateTotals(updates.items!);
+              return {
+                ...q,
+                ...updates,
+                items: updates.items!.map((item) => ({
+                  ...item,
+                  total: item.quantity * item.unitPrice * (1 - item.discount / 100),
+                })),
+                subtotal,
+                totalAmount,
+                updatedAt: new Date().toISOString(),
+              };
+            })
+          );
+          
           toast.success('Quotation updated successfully');
         } else {
           // For other updates, just update locally
@@ -164,9 +192,9 @@ export function QuotationProvider({ children }: { children: ReactNode }) {
       } catch (error) {
         console.error('Failed to update quotation:', error);
         toast.error('Failed to update quotation');
+        // Refresh on error to get the correct state
+        await refreshQuotations();
         throw error;
-      } finally {
-        setLoading(false);
       }
     } else {
       // LocalStorage mode
@@ -194,17 +222,40 @@ export function QuotationProvider({ children }: { children: ReactNode }) {
   const updateQuotationStatus = async (id: string, status: QuotationStatus, reason?: string) => {
     if (USE_API) {
       try {
-        setLoading(true);
+        // Don't set global loading - use individual button loading states instead
         
         if (status === 'accepted') {
           // Accept quotation
           await quotationApi.acceptQuotation(id);
-          await refreshQuotations();
+          // Optimistically update the UI first
+          setQuotations((prev) =>
+            prev.map((q) =>
+              q.id === id
+                ? {
+                    ...q,
+                    status: 'accepted',
+                    updatedAt: new Date().toISOString(),
+                  }
+                : q
+            )
+          );
           toast.success('Quotation accepted');
         } else if (status === 'rejected') {
           // Reject quotation
           await quotationApi.rejectQuotation(id);
-          await refreshQuotations();
+          // Optimistically update the UI first
+          setQuotations((prev) =>
+            prev.map((q) =>
+              q.id === id
+                ? {
+                    ...q,
+                    status: 'rejected',
+                    updatedAt: new Date().toISOString(),
+                    ...(reason ? { rejectionReason: reason } : {}),
+                  }
+                : q
+            )
+          );
           toast.success('Quotation rejected');
         } else if (status === 'sent') {
           // This shouldn't happen from user side, but handle it
@@ -218,7 +269,7 @@ export function QuotationProvider({ children }: { children: ReactNode }) {
                     ...q,
                     status,
                     updatedAt: new Date().toISOString(),
-                    ...(reason && status === "rejected" ? { rejectionReason: reason } : {}),
+                    ...(reason && (status as string) === "rejected" ? { rejectionReason: reason } : {}),
                   }
                 : q
             )
@@ -228,9 +279,9 @@ export function QuotationProvider({ children }: { children: ReactNode }) {
       } catch (error) {
         console.error('Failed to update quotation status:', error);
         toast.error('Failed to update quotation status');
+        // Refresh on error to get the correct state
+        await refreshQuotations();
         throw error;
-      } finally {
-        setLoading(false);
       }
     } else {
       // LocalStorage mode
@@ -241,12 +292,20 @@ export function QuotationProvider({ children }: { children: ReactNode }) {
                 ...q,
                 status,
                 updatedAt: new Date().toISOString(),
-                ...(reason && status === "rejected" ? { rejectionReason: reason } : {}),
+                ...(reason && (status as string) === "rejected" ? { rejectionReason: reason } : {}),
               }
             : q
         )
       );
     }
+  };
+
+  const acceptQuotation = async (id: string) => {
+    await updateQuotationStatus(id, 'accepted');
+  };
+
+  const rejectQuotation = async (id: string) => {
+    await updateQuotationStatus(id, 'rejected');
   };
 
   const deleteQuotation = async (id: string) => {
@@ -267,7 +326,7 @@ export function QuotationProvider({ children }: { children: ReactNode }) {
       // LocalStorage mode
       setQuotations((prev) => {
         const q = prev.find((q) => q.id === id);
-        if (q && q.status !== "rejected" && q.status !== "draft") return prev;
+        if (q && q.status !== "rejected" && q.status !== "draft" && q.status !== "converted") return prev;
         return prev.filter((q) => q.id !== id);
       });
       toast.success('Quotation deleted');
@@ -348,6 +407,8 @@ export function QuotationProvider({ children }: { children: ReactNode }) {
         updateQuotation,
         updateAndSendQuotation,
         updateQuotationStatus,
+        acceptQuotation,
+        rejectQuotation,
         deleteQuotation,
         convertToOrder,
         getQuotationsByUser,

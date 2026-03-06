@@ -25,4 +25,5 @@ export interface Quotation {
   userId: string;
   adminNotes?: string;
   convertedOrderId?: string;
+  rejectionReason?: string;
 }

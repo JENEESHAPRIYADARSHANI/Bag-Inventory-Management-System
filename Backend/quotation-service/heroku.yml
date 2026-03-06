@@ -1,8 +1,0 @@
-# Heroku deployment configuration for Quotation Service
-
-build:
-  docker:
-    web: Dockerfile
-
-run:
-  web: java -jar app.jar --spring.profiles.active=cloud
