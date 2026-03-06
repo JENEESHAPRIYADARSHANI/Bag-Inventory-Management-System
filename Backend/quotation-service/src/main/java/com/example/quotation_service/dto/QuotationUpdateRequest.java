@@ -1,20 +1,48 @@
 package com.example.quotation_service.dto;
 
-import lombok.Data;
 import java.math.BigDecimal;
 import java.util.List;
 
-@Data
 public class QuotationUpdateRequest {
+
     private List<ItemUpdate> items;
 
-    @Data
     public static class ItemUpdate {
-        private Long itemId; // The ID of the QuotationItem
+        private Long itemId;
         private BigDecimal unitPrice;
-        private BigDecimal discount; // Expected as percentage or flat? Assume flat amount or percentage. We'll use
-                                     // percentage for now: (Unit Price * Quantity) * (1 - discount/100) or simply
-                                     // standard amount discount. Let's stick with percentage based on previous
-                                     // implementation.
+        private BigDecimal discount; // Percentage (0-100)
+
+        public Long getItemId() {
+            return itemId;
+        }
+
+        public void setItemId(Long itemId) {
+            this.itemId = itemId;
+        }
+
+        public BigDecimal getUnitPrice() {
+            return unitPrice;
+        }
+
+        public void setUnitPrice(BigDecimal unitPrice) {
+            this.unitPrice = unitPrice;
+        }
+
+        public BigDecimal getDiscount() {
+            return discount;
+        }
+
+        public void setDiscount(BigDecimal discount) {
+            this.discount = discount;
+        }
+    }
+
+    // Getters and Setters
+    public List<ItemUpdate> getItems() {
+        return items;
+    }
+
+    public void setItems(List<ItemUpdate> items) {
+        this.items = items;
     }
 }

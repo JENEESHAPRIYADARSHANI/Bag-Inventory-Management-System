@@ -1,0 +1,53 @@
+services:
+<<<<<<< HEAD
+  mysql:
+    image: mysql:8.0
+    container_name: order-mysql
+    environment:
+      MYSQL_DATABASE: order_management_db
+      MYSQL_USER: orderuser
+      MYSQL_PASSWORD: orderpass
+      MYSQL_ROOT_PASSWORD: rootpass
+    ports:
+      - "3307:3306" # optional: access mysql from your PC at localhost:3307
+    volumes:
+      - order_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-prootpass"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  order-service:
+    container_name: order-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8083:8083"
+    environment:
+      # ✅ tells Spring to use docker db host "mysql"
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/order_management_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: orderuser
+      SPRING_DATASOURCE_PASSWORD: orderpass
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SERVER_PORT: 8083
+    restart: unless-stopped
+
+volumes:
+  order_mysql_data:
+=======
+  order-management-service:
+    build: .
+    container_name: order-management-service
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://order-management-db.c36keqki0gue.eu-north-1.rds.amazonaws.com:3306/order_management_db?useSSL=true&requireSSL=true
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: order123
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+>>>>>>> ed2092798d899258e73e136559f217854ecc8c72

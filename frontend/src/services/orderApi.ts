@@ -1,6 +1,8 @@
 // src/services/orderApi.ts
 const BASE_URL = import.meta.env.VITE_ORDER_API_URL || "http://localhost:8083";
 
+const ORDERS_PATH = "/orders";
+
 export type OrderStatus =
   | "PENDING"
   | "CONFIRMED"
@@ -13,6 +15,7 @@ export interface OrderDto {
   id?: number;
   customerId: number;
   customerName?: string | null;
+  quotationId?: number | null;
   totalAmount?: number | null;
   deliveryDate?: string | null;
   productIds: string;

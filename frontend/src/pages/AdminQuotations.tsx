@@ -118,12 +118,16 @@ const AdminQuotations = () => {
     setIsRejectOpen(true);
   };
 
-  const handleReject = () => {
+  const handleReject = async () => {
     if (!selectedQuotation) return;
-    updateQuotationStatus(selectedQuotation.id, "rejected", rejectionReason);
-    toast.success("Quotation rejected");
-    setIsRejectOpen(false);
-    setIsDetailOpen(false);
+    try {
+      await updateQuotationStatus(selectedQuotation.id, "rejected", rejectionReason);
+      setIsRejectOpen(false);
+      setIsDetailOpen(false);
+    } catch (error) {
+      // Error toast is already shown in updateQuotationStatus
+      console.error("Failed to reject quotation:", error);
+    }
   };
 
   const handleConvert = (quotation: Quotation) => {
@@ -131,9 +135,13 @@ const AdminQuotations = () => {
     toast.success(`Quotation converted to order ${orderId}`);
   };
 
-  const handleDelete = (quotation: Quotation) => {
-    deleteQuotation(quotation.id);
-    toast.success("Quotation deleted");
+  const handleDelete = async (quotation: Quotation) => {
+    try {
+      await deleteQuotation(quotation.id);
+    } catch (error) {
+      // Error toast is already shown in deleteQuotation
+      console.error("Failed to delete quotation:", error);
+    }
   };
 
   const handleItemPriceChange = (index: number, field: "unitPrice" | "discount", value: number) => {

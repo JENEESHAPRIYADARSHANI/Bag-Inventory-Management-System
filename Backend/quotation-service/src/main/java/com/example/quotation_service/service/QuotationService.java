@@ -1,6 +1,6 @@
 package com.example.quotation_service.service;
 
-import com.example.quotation_service.client.OrderServiceClient;
+import com.example.quotation_service.client.OrderClient;
 import com.example.quotation_service.client.ProductClient;
 import com.example.quotation_service.dto.*;
 import com.example.quotation_service.model.Quotation;
@@ -20,14 +20,14 @@ public class QuotationService {
 
     private final QuotationRepository quotationRepository;
     private final ProductClient productClient;
-    private final OrderServiceClient orderServiceClient;
+    private final OrderClient orderClient;
 
     public QuotationService(QuotationRepository quotationRepository,
             ProductClient productClient,
-            OrderServiceClient orderServiceClient) {
+            OrderClient orderClient) {
         this.quotationRepository = quotationRepository;
         this.productClient = productClient;
-        this.orderServiceClient = orderServiceClient;
+        this.orderClient = orderClient;
     }
 
     public List<ProductDto> getProducts() {
@@ -150,14 +150,12 @@ public class QuotationService {
         }
 
         // Prepare order request for Order Management Service
-        CreateOrderRequest orderRequest = new CreateOrderRequest();
+        OrderRequestDto orderRequest = new OrderRequestDto();
         
-        // Parse customerId to Long (Order Service expects Long)
-        try {
-            orderRequest.setCustomerId(Long.parseLong(quotation.getCustomerId()));
-        } catch (NumberFormatException e) {
-            throw new RuntimeException("Invalid customer ID format: " + quotation.getCustomerId());
-        }
+        orderRequest.setQuotationId(id);
+        orderRequest.setCustomerId(quotation.getCustomerId());
+        orderRequest.setCustomerName(quotation.getCompanyName());
+        orderRequest.setTotalAmount(quotation.getTotalAmount());
         
         // Convert quotation items to comma-separated format expected by Order Service
         String productIds = quotation.getItems().stream()
@@ -170,15 +168,13 @@ public class QuotationService {
         
         orderRequest.setProductIds(productIds);
         orderRequest.setQuantities(quantities);
-        orderRequest.setOrderDate(LocalDateTime.now());
-        orderRequest.setStatus("PENDING");  // Initial status in Order Service
+        orderRequest.setDeliveryDate(LocalDateTime.now().plusDays(7)); // Default 7 days delivery
 
         try {
             // Call Order Management Service to create the order
-            OrderResponseDto orderResponse = orderServiceClient.createOrder(orderRequest);
+            String response = orderClient.createOrder(orderRequest);
             
-            // Update quotation with order reference
-            quotation.setOrderId(orderResponse.getOrderId());
+            // Update quotation status to CONVERTED
             quotation.setStatus("CONVERTED");
             
             return quotationRepository.save(quotation);
@@ -190,5 +186,21 @@ public class QuotationService {
                 + e.getMessage(), e
             );
         }
+    }
+
+    @Transactional
+    public Quotation rejectQuotation(Long id) {
+        Quotation quotation = quotationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Quotation not found"));
+        if (!"SENT".equals(quotation.getStatus()) && !"DRAFT".equals(quotation.getStatus())) {
+            throw new RuntimeException("Only SENT or DRAFT quotations can be rejected");
+        }
+        quotation.setStatus("REJECTED");
+        return quotationRepository.save(quotation);
+    }
+
+    @Transactional
+    public void deleteQuotation(Long id) {
+        quotationRepository.deleteById(id);
     }
 }

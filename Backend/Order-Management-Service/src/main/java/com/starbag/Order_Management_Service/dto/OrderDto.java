@@ -7,6 +7,7 @@ public class OrderDto {
     private Long id;
     private Long customerId;
     private String customerName;
+    private Long quotationId;
     private Double totalAmount;
     private LocalDateTime deliveryDate;
 
@@ -21,6 +22,7 @@ public class OrderDto {
             Long id,
             Long customerId,
             String customerName,
+            Long quotationId,
             Double totalAmount,
             LocalDateTime deliveryDate,
             String productIds,
@@ -31,6 +33,7 @@ public class OrderDto {
         this.id = id;
         this.customerId = customerId;
         this.customerName = customerName;
+        this.quotationId = quotationId;
         this.totalAmount = totalAmount;
         this.deliveryDate = deliveryDate;
         this.productIds = productIds;
@@ -47,6 +50,9 @@ public class OrderDto {
 
     public String getCustomerName() { return customerName; }
     public void setCustomerName(String customerName) { this.customerName = customerName; }
+
+    public Long getQuotationId() { return quotationId; }
+    public void setQuotationId(Long quotationId) { this.quotationId = quotationId; }
 
     public Double getTotalAmount() { return totalAmount; }
     public void setTotalAmount(Double totalAmount) { this.totalAmount = totalAmount; }
