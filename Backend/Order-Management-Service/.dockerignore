@@ -1,3 +1,12 @@
+<<<<<<< HEAD
+target
+.git
+.gitignore
+.idea
+.vscode
+*.iml
+*.log
+=======
 target/
 .mvn/
 *.log
@@ -7,3 +16,4 @@ README.md
 *.md
 .idea/
 .vscode/
+>>>>>>> ed2092798d899258e73e136559f217854ecc8c72

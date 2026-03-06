@@ -1,6 +1,8 @@
 // src/services/orderApi.ts
 const BASE_URL = import.meta.env.VITE_ORDER_API_URL || "http://localhost:8083";
 
+const ORDERS_PATH = "/orders";
+
 export type OrderStatus =
   | "PENDING"
   | "CONFIRMED"
