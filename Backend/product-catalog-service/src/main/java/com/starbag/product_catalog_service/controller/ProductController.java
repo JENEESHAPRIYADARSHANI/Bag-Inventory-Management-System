@@ -4,11 +4,12 @@ import com.starbag.product_catalog_service.domain.Product;
 import com.starbag.product_catalog_service.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/api/v1/products")
 @CrossOrigin(origins = "*")
 public class ProductController {
 
@@ -25,13 +26,21 @@ public class ProductController {
         return service.createProduct(product);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
+
+        Product product = service.getProductById(id);
+
+        return ResponseEntity.ok(product);
+    }
+
     @PutMapping("/{id}")
-    public Product updateProduct(@PathVariable String id, @RequestBody Product product) {
+    public Product updateProduct(@PathVariable Long id, @RequestBody Product product) {
         return service.updateProduct(id, product);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteProduct(@PathVariable String id) {
+    public void deleteProduct(@PathVariable Long id) {
         service.deleteProduct(id);
     }
 }
