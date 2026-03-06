@@ -1,11 +1,11 @@
-package com.starbag.product_catalog_service.domain;
-
 import jakarta.persistence.*;
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Data
 @Entity
 @Table(name = "product_variants")
+@JsonIgnoreProperties({"id"})
 public class ProductVariant {
 
     @Id
@@ -14,8 +14,9 @@ public class ProductVariant {
 
     private String color;
 
-    // We store the file names or URLs as strings in the database
     private String frontView;
+
     private String backView;
+
     private String insideView;
 }
