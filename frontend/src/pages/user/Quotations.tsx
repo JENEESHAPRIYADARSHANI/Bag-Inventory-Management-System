@@ -2,25 +2,35 @@ import { useState, useEffect } from "react";
 import { UserLayout } from "@/components/layout/UserLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuotations } from "@/contexts/QuotationContext";
-import { QuotationStatus } from "@/types/quotation";
+import { Quotation, QuotationItem, QuotationStatus } from "@/types/quotation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   FileText,
   Plus,
   Clock,
   CheckCircle,
+  XCircle,
   ArrowRightLeft,
   Building2,
   RefreshCw,
   X,
-  ThumbsUp,
-  ThumbsDown,
+  Eye,
+  Edit,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
 
 const statusConfig: Record<QuotationStatus, { label: string; icon: typeof Clock; className: string }> = {
   draft: {
@@ -29,31 +39,34 @@ const statusConfig: Record<QuotationStatus, { label: string; icon: typeof Clock;
     className: "bg-warning/10 text-warning border-warning/20",
   },
   sent: {
-    label: "Sent - Awaiting Your Response",
+    label: "Sent - Under Review",
     icon: CheckCircle,
-    className: "bg-info/10 text-info border-info/20",
+    className: "bg-success/10 text-success border-success/20",
   },
   accepted: {
     label: "Accepted",
     icon: CheckCircle,
-    className: "bg-success/10 text-success border-success/20",
+    className: "bg-info/10 text-info border-info/20",
+  },
+  rejected: {
+    label: "Rejected",
+    icon: XCircle,
+    className: "bg-destructive/10 text-destructive border-destructive/20",
   },
   converted: {
     label: "Converted to Order",
     icon: ArrowRightLeft,
     className: "bg-primary/10 text-primary border-primary/20",
   },
-  rejected: {
-    label: "Rejected",
-    icon: X,
-    className: "bg-destructive/10 text-destructive border-destructive/20",
-  },
 };
 
 const UserQuotations = () => {
   const { user } = useAuth();
-  const { getQuotationsByUser, acceptQuotation, rejectQuotation, refreshQuotations, loading } = useQuotations();
+  const { getQuotationsByUser, updateQuotation, refreshQuotations, loading } = useQuotations();
   const quotations = user ? getQuotationsByUser(user.id) : [];
+  const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [editingItems, setEditingItems] = useState<QuotationItem[] | null>(null);
 
   const sorted = [...quotations].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -69,31 +82,35 @@ const UserQuotations = () => {
     toast.success("Quotations refreshed");
   };
 
-  const handleAccept = async (quotationId: string) => {
-    if (!window.confirm("Are you sure you want to accept this quotation?")) {
-      return;
-    }
-    
+  const openDetail = (quotation: Quotation) => {
+    setSelectedQuotation(quotation);
+    setEditingItems(quotation.items.map((item) => ({ ...item })));
+    setIsDetailOpen(true);
+  };
+
+  const handleSaveChanges = async () => {
+    if (!selectedQuotation || !editingItems) return;
     try {
-      await acceptQuotation(quotationId);
+      await updateQuotation(selectedQuotation.id, { items: editingItems });
+      setIsDetailOpen(false);
     } catch (error) {
       // Error is handled in context
     }
   };
 
-  const handleReject = async (quotationId: string) => {
-    if (!window.confirm("Are you sure you want to reject this quotation?")) {
-      return;
-    }
-    
-    try {
-      await rejectQuotation(quotationId);
-    } catch (error) {
-      // Error is handled in context
-    }
+  const handleItemPriceChange = (index: number, field: "unitPrice" | "discount", value: number) => {
+    if (!editingItems) return;
+    setEditingItems((prev) =>
+      prev!.map((item, i) => {
+        if (i !== index) return item;
+        const updated = { ...item, [field]: value };
+        updated.total = updated.quantity * updated.unitPrice * (1 - updated.discount / 100);
+        return updated;
+      })
+    );
   };
 
-
+  const editingTotal = editingItems?.reduce((sum, item) => sum + item.total, 0) || 0;
 
   return (
     <UserLayout>
@@ -107,14 +124,8 @@ const UserQuotations = () => {
             <p className="text-muted-foreground">Track the status of your quotation requests</p>
           </div>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={handleRefresh}
-              disabled={loading}
-              className="gap-2"
-            >
+            <Button variant="outline" onClick={handleRefresh} disabled={loading}>
               <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
-              Refresh
             </Button>
             <Link to="/user/request-quotation">
               <Button className="btn-gradient gap-2">
@@ -125,7 +136,7 @@ const UserQuotations = () => {
           </div>
         </div>
 
-        {sorted.length === 0 ? (
+        {quotations.length === 0 ? (
           <Card className="border-border/50">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <FileText className="h-12 w-12 text-muted-foreground mb-4" />
@@ -156,7 +167,7 @@ const UserQuotations = () => {
                           <Building2 className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <CardTitle className="text-lg">{quotation.id}</CardTitle>
+                          <CardTitle className="text-lg">#{quotation.id}</CardTitle>
                           <p className="text-sm text-muted-foreground">{quotation.companyName}</p>
                         </div>
                       </div>
@@ -193,6 +204,13 @@ const UserQuotations = () => {
                         </span>
                       </div>
                     </div>
+                    {quotation.status === "rejected" && quotation.rejectionReason && (
+                      <div className="mt-3 p-3 rounded-lg bg-destructive/5 border border-destructive/10">
+                        <p className="text-sm text-destructive">
+                          <strong>Reason:</strong> {quotation.rejectionReason}
+                        </p>
+                      </div>
+                    )}
                     {quotation.status === "converted" && quotation.convertedOrderId && (
                       <div className="mt-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
                         <p className="text-sm text-primary">
@@ -200,25 +218,31 @@ const UserQuotations = () => {
                         </p>
                       </div>
                     )}
-                    {quotation.status === "sent" && (
-                      <div className="mt-3 flex gap-2">
-                        <Button
-                          className="flex-1 btn-gradient gap-2"
-                          onClick={() => handleAccept(quotation.id)}
-                        >
-                          <ThumbsUp className="h-4 w-4" />
-                          Accept Quotation
-                        </Button>
+                    
+                    {/* Action buttons based on status */}
+                    <div className="mt-3 flex gap-2">
+                      {quotation.status === "draft" && (
                         <Button
                           variant="outline"
-                          className="flex-1 text-destructive border-destructive/50 hover:bg-destructive/10 gap-2"
-                          onClick={() => handleReject(quotation.id)}
+                          className="flex-1 gap-2"
+                          onClick={() => openDetail(quotation)}
                         >
-                          <ThumbsDown className="h-4 w-4" />
-                          Reject
+                          <Edit className="h-4 w-4" />
+                          Edit Quotation
                         </Button>
-                      </div>
-                    )}
+                      )}
+                      
+                      {quotation.status !== "draft" && (
+                        <Button
+                          variant="outline"
+                          className="flex-1 gap-2"
+                          onClick={() => openDetail(quotation)}
+                        >
+                          <Eye className="h-4 w-4" />
+                          View Details
+                        </Button>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               );
@@ -226,6 +250,119 @@ const UserQuotations = () => {
           </div>
         )}
       </div>
+
+      {/* Detail / Edit Dialog */}
+      <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              Quotation #{selectedQuotation?.id}
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedQuotation && (
+            <div className="space-y-6">
+              {/* Customer Info */}
+              <div className="grid gap-3 sm:grid-cols-2 p-4 rounded-lg bg-muted/50">
+                <div>
+                  <p className="text-xs text-muted-foreground">Company</p>
+                  <p className="font-medium">{selectedQuotation.companyName}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Contact</p>
+                  <p className="font-medium">{selectedQuotation.contactPerson}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Email</p>
+                  <p className="font-medium">{selectedQuotation.email}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Phone</p>
+                  <p className="font-medium">{selectedQuotation.phone || "N/A"}</p>
+                </div>
+              </div>
+
+              {/* Items */}
+              <div>
+                <h3 className="font-semibold mb-3">Products</h3>
+                <div className="space-y-3">
+                  {editingItems?.map((item, index) => (
+                    <div
+                      key={index}
+                      className="grid gap-3 sm:grid-cols-[1fr_90px_90px_90px] items-end p-3 rounded-lg border border-border"
+                    >
+                      <div>
+                        <Label className="text-xs">Product</Label>
+                        <p className="font-medium text-sm">{item.productName} × {item.quantity}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Unit Price</Label>
+                        {selectedQuotation.status === "draft" ? (
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={item.unitPrice}
+                            onChange={(e) => handleItemPriceChange(index, "unitPrice", parseFloat(e.target.value) || 0)}
+                            className="h-8 text-sm"
+                          />
+                        ) : (
+                          <p className="font-medium text-sm">${item.unitPrice.toFixed(2)}</p>
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Discount %</Label>
+                        {selectedQuotation.status === "draft" ? (
+                          <Input
+                            type="number"
+                            min={0}
+                            max={100}
+                            value={item.discount}
+                            onChange={(e) => handleItemPriceChange(index, "discount", parseFloat(e.target.value) || 0)}
+                            className="h-8 text-sm"
+                          />
+                        ) : (
+                          <p className="font-medium text-sm">{item.discount}%</p>
+                        )}
+                      </div>
+                      <div>
+                        <Label className="text-xs">Line Total</Label>
+                        <p className="font-semibold text-sm text-primary">${item.total.toFixed(2)}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-end mt-3 text-lg">
+                  <span className="mr-3 font-medium">Total:</span>
+                  <span className="font-bold text-primary">${editingTotal.toFixed(2)}</span>
+                </div>
+              </div>
+
+              {/* Special Notes */}
+              {selectedQuotation.specialNotes && (
+                <div>
+                  <h3 className="font-semibold mb-2">Special Notes</h3>
+                  <p className="text-sm text-muted-foreground p-3 rounded-lg bg-muted/50">
+                    {selectedQuotation.specialNotes}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          <DialogFooter className="flex-wrap gap-2">
+            {selectedQuotation?.status === "draft" && (
+              <Button className="btn-gradient gap-1" onClick={handleSaveChanges}>
+                <Edit className="h-4 w-4" />
+                Save Changes
+              </Button>
+            )}
+            <Button variant="outline" onClick={() => setIsDetailOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </UserLayout>
   );
 };

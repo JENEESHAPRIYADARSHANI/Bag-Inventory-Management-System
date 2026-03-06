@@ -4,7 +4,7 @@ import { Quotation, QuotationItem } from '@/types/quotation';
 // Backend API base URL - Update this to match your backend server
 // Local development: 'http://localhost:8080/api'
 // AWS Production: 'http://3.227.243.51:8080/api'
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://3.227.243.51:8080/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -73,7 +73,7 @@ const mapBackendStatus = (backendStatus: string): Quotation['status'] => {
     case 'DRAFT':
       return 'draft';
     case 'SENT':
-      return 'approved'; // SENT means admin approved and sent to customer
+      return 'sent'; // SENT means admin approved and sent to customer
     case 'ACCEPTED':
       return 'accepted'; // Customer accepted - ready to convert
     case 'REJECTED':
@@ -90,7 +90,7 @@ const mapFrontendStatus = (frontendStatus: Quotation['status']): string => {
   switch (frontendStatus) {
     case 'draft':
       return 'DRAFT';
-    case 'approved':
+    case 'sent':
       return 'SENT';
     case 'accepted':
       return 'ACCEPTED';
@@ -245,14 +245,72 @@ export const updateAndSendQuotation = async (
     const currentQuotation = await api.get<BackendQuotation>(`/quotations/${backendId}`);
     
     const request: BackendQuotationUpdateRequest = {
-      items: items.map((item, index) => ({
-        itemId: currentQuotation.data.items[index].id,
-        unitPrice: item.unitPrice,
-        discount: item.discount,
-      })),
+      items: items.map((item) => {
+        // Find the corresponding backend item by productId
+        const backendItem = currentQuotation.data.items.find(
+          (backendItem) => backendItem.productId === parseInt(item.productId)
+        );
+        
+        if (!backendItem) {
+          throw new Error(`Backend item not found for product ID: ${item.productId}`);
+        }
+        
+        return {
+          itemId: backendItem.id,
+          unitPrice: item.unitPrice,
+          discount: item.discount,
+        };
+      }),
     };
 
+    console.log('Sending update request:', request);
     const response = await api.put<BackendQuotation>(`/quotations/${backendId}/send`, request);
+    const products = await getProducts();
+    return convertToFrontendQuotation(response.data, products);
+  } catch (error) {
+    console.error('Error updating quotation:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update quotation without changing status (User can update draft quotations)
+ */
+export const updateQuotationOnly = async (
+  id: string,
+  items: QuotationItem[]
+): Promise<Quotation> => {
+  try {
+    const backendId = id.replace('QT-', '');
+    
+    // Get current quotation to get item IDs
+    const currentQuotation = await api.get<BackendQuotation>(`/quotations/${backendId}`);
+    
+    if (currentQuotation.data.status !== 'DRAFT') {
+      throw new Error('Only draft quotations can be updated by users');
+    }
+    
+    const request: BackendQuotationUpdateRequest = {
+      items: items.map((item) => {
+        // Find the corresponding backend item by productId
+        const backendItem = currentQuotation.data.items.find(
+          (backendItem) => backendItem.productId === parseInt(item.productId)
+        );
+        
+        if (!backendItem) {
+          throw new Error(`Backend item not found for product ID: ${item.productId}`);
+        }
+        
+        return {
+          itemId: backendItem.id,
+          unitPrice: item.unitPrice,
+          discount: item.discount,
+        };
+      }),
+    };
+
+    console.log('Sending user update request:', request);
+    const response = await api.put<BackendQuotation>(`/quotations/${backendId}`, request);
     const products = await getProducts();
     return convertToFrontendQuotation(response.data, products);
   } catch (error) {
@@ -352,6 +410,7 @@ export default {
   getQuotationById,
   searchQuotationsByEmail,
   updateAndSendQuotation,
+  updateQuotationOnly,
   acceptQuotation,
   rejectQuotation,
   deleteQuotation,
