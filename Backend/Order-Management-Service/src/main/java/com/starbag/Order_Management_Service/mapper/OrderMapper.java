@@ -14,6 +14,7 @@ public class OrderMapper {
                 o.getId(),
                 o.getCustomerId(),
                 o.getCustomerName(),
+                o.getQuotationId(),
                 o.getTotalAmount(),
                 o.getDeliveryDate(),
                 o.getProductIds(),
@@ -29,6 +30,7 @@ public class OrderMapper {
         Order o = new Order();
         o.setCustomerId(dto.getCustomerId());
         o.setCustomerName(dto.getCustomerName());
+        o.setQuotationId(dto.getQuotationId());
         o.setTotalAmount(dto.getTotalAmount());
         o.setDeliveryDate(dto.getDeliveryDate());
         o.setProductIds(dto.getProductIds());

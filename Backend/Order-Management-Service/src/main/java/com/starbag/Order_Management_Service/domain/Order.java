@@ -18,6 +18,9 @@ public class Order {
     @Column(name = "customer_name")
     private String customerName;
 
+    @Column(name = "quotation_id")
+    private Long quotationId;
+
     @Column(name = "total_amount")
     private Double totalAmount;
 
@@ -51,6 +54,9 @@ public class Order {
 
     public String getCustomerName() { return customerName; }
     public void setCustomerName(String customerName) { this.customerName = customerName; }
+
+    public Long getQuotationId() { return quotationId; }
+    public void setQuotationId(Long quotationId) { this.quotationId = quotationId; }
 
     public Double getTotalAmount() { return totalAmount; }
     public void setTotalAmount(Double totalAmount) { this.totalAmount = totalAmount; }

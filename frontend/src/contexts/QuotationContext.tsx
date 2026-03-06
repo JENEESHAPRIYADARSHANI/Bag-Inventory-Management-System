@@ -179,11 +179,16 @@ export function QuotationProvider({ children }: { children: ReactNode }) {
           await quotationApi.acceptQuotation(id);
           await refreshQuotations();
           toast.success('Quotation accepted');
+        } else if (status === 'rejected') {
+          // Reject quotation
+          await quotationApi.rejectQuotation(id);
+          await refreshQuotations();
+          toast.success('Quotation rejected');
         } else if (status === 'approved') {
           // This shouldn't happen from user side, but handle it
           toast.info('Quotation already approved');
         } else {
-          // For rejected status, update locally (backend doesn't have reject endpoint)
+          // For other statuses, update locally
           setQuotations((prev) =>
             prev.map((q) =>
               q.id === id
@@ -222,13 +227,29 @@ export function QuotationProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const deleteQuotation = (id: string) => {
-    setQuotations((prev) => {
-      const q = prev.find((q) => q.id === id);
-      if (q && q.status !== "rejected") return prev;
-      return prev.filter((q) => q.id !== id);
-    });
-    toast.success('Quotation deleted');
+  const deleteQuotation = async (id: string) => {
+    if (USE_API) {
+      try {
+        setLoading(true);
+        await quotationApi.deleteQuotation(id);
+        setQuotations((prev) => prev.filter((q) => q.id !== id));
+        toast.success('Quotation deleted');
+      } catch (error) {
+        console.error('Failed to delete quotation:', error);
+        toast.error('Failed to delete quotation. Only DRAFT or REJECTED quotations can be deleted.');
+        throw error;
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // LocalStorage mode
+      setQuotations((prev) => {
+        const q = prev.find((q) => q.id === id);
+        if (q && q.status !== "rejected" && q.status !== "draft") return prev;
+        return prev.filter((q) => q.id !== id);
+      });
+      toast.success('Quotation deleted');
+    }
   };
 
   const convertToOrder = async (id: string): Promise<string> => {
