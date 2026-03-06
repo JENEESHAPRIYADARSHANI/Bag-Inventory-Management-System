@@ -1,4 +1,4 @@
-package com.starbag.inventory.service.impl;
+package com.starbag.inventory.service;
 
 import com.starbag.inventory.domain.Inventory;
 
@@ -11,5 +11,7 @@ public interface InventoryService {
     List<Inventory> getAllInventory();
 
     Inventory getInventoryById(Long id);
+
+    void deleteInventory(Long id);
 
 }

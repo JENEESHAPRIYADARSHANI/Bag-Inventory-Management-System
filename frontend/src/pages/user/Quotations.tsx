@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { UserLayout } from "@/components/layout/UserLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuotations } from "@/contexts/QuotationContext";
@@ -11,11 +12,15 @@ import {
   Plus,
   Clock,
   CheckCircle,
-  XCircle,
   ArrowRightLeft,
   Building2,
+  RefreshCw,
+  X,
+  ThumbsUp,
+  ThumbsDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const statusConfig: Record<QuotationStatus, { label: string; icon: typeof Clock; className: string }> = {
   draft: {
@@ -23,36 +28,72 @@ const statusConfig: Record<QuotationStatus, { label: string; icon: typeof Clock;
     icon: Clock,
     className: "bg-warning/10 text-warning border-warning/20",
   },
-  approved: {
-    label: "Approved",
+  sent: {
+    label: "Sent - Awaiting Your Response",
     icon: CheckCircle,
-    className: "bg-success/10 text-success border-success/20",
+    className: "bg-info/10 text-info border-info/20",
   },
   accepted: {
     label: "Accepted",
     icon: CheckCircle,
-    className: "bg-info/10 text-info border-info/20",
-  },
-  rejected: {
-    label: "Rejected",
-    icon: XCircle,
-    className: "bg-destructive/10 text-destructive border-destructive/20",
+    className: "bg-success/10 text-success border-success/20",
   },
   converted: {
     label: "Converted to Order",
     icon: ArrowRightLeft,
     className: "bg-primary/10 text-primary border-primary/20",
   },
+  rejected: {
+    label: "Rejected",
+    icon: X,
+    className: "bg-destructive/10 text-destructive border-destructive/20",
+  },
 };
 
 const UserQuotations = () => {
   const { user } = useAuth();
-  const { getQuotationsByUser } = useQuotations();
+  const { getQuotationsByUser, acceptQuotation, rejectQuotation, refreshQuotations, loading } = useQuotations();
   const quotations = user ? getQuotationsByUser(user.id) : [];
 
   const sorted = [...quotations].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
+
+  // Refresh quotations on mount
+  useEffect(() => {
+    refreshQuotations();
+  }, []);
+
+  const handleRefresh = async () => {
+    await refreshQuotations();
+    toast.success("Quotations refreshed");
+  };
+
+  const handleAccept = async (quotationId: string) => {
+    if (!window.confirm("Are you sure you want to accept this quotation?")) {
+      return;
+    }
+    
+    try {
+      await acceptQuotation(quotationId);
+    } catch (error) {
+      // Error is handled in context
+    }
+  };
+
+  const handleReject = async (quotationId: string) => {
+    if (!window.confirm("Are you sure you want to reject this quotation?")) {
+      return;
+    }
+    
+    try {
+      await rejectQuotation(quotationId);
+    } catch (error) {
+      // Error is handled in context
+    }
+  };
+
+
 
   return (
     <UserLayout>
@@ -65,12 +106,23 @@ const UserQuotations = () => {
             </h1>
             <p className="text-muted-foreground">Track the status of your quotation requests</p>
           </div>
-          <Link to="/user/request-quotation">
-            <Button className="btn-gradient gap-2">
-              <Plus className="h-4 w-4" />
-              New Quotation
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={handleRefresh}
+              disabled={loading}
+              className="gap-2"
+            >
+              <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+              Refresh
             </Button>
-          </Link>
+            <Link to="/user/request-quotation">
+              <Button className="btn-gradient gap-2">
+                <Plus className="h-4 w-4" />
+                New Quotation
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {sorted.length === 0 ? (
@@ -141,18 +193,30 @@ const UserQuotations = () => {
                         </span>
                       </div>
                     </div>
-                    {quotation.status === "rejected" && quotation.rejectionReason && (
-                      <div className="mt-3 p-3 rounded-lg bg-destructive/5 border border-destructive/10">
-                        <p className="text-sm text-destructive">
-                          <strong>Reason:</strong> {quotation.rejectionReason}
-                        </p>
-                      </div>
-                    )}
                     {quotation.status === "converted" && quotation.convertedOrderId && (
                       <div className="mt-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
                         <p className="text-sm text-primary">
                           <strong>Order Created:</strong> {quotation.convertedOrderId}
                         </p>
+                      </div>
+                    )}
+                    {quotation.status === "sent" && (
+                      <div className="mt-3 flex gap-2">
+                        <Button
+                          className="flex-1 btn-gradient gap-2"
+                          onClick={() => handleAccept(quotation.id)}
+                        >
+                          <ThumbsUp className="h-4 w-4" />
+                          Accept Quotation
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="flex-1 text-destructive border-destructive/50 hover:bg-destructive/10 gap-2"
+                          onClick={() => handleReject(quotation.id)}
+                        >
+                          <ThumbsDown className="h-4 w-4" />
+                          Reject
+                        </Button>
                       </div>
                     )}
                   </CardContent>

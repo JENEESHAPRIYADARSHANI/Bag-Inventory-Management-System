@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8081/api/tracking";
+const BASE_URL = "http://localhost:8081/api/v1/logistics";
 
 // Types matching backend DTOs
 export interface CreateTrackingRequest {

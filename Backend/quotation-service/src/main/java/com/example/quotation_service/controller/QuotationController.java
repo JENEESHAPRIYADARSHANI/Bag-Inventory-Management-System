@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin("*")
 @RequestMapping("/api/quotations")
 public class QuotationController {
 
@@ -73,6 +72,25 @@ public class QuotationController {
     public ResponseEntity<Quotation> convertToOrder(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(quotationService.convertToOrder(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PutMapping("/{id}/reject")
+    public ResponseEntity<Quotation> rejectQuotation(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(quotationService.rejectQuotation(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteQuotation(@PathVariable Long id) {
+        try {
+            quotationService.deleteQuotation(id);
+            return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }

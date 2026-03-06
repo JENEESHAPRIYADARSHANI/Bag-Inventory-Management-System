@@ -2,7 +2,7 @@ package com.starbag.inventory.controller;
 
 import com.starbag.inventory.domain.Inventory;
 import com.starbag.inventory.dto.InventoryDto;
-import com.starbag.inventory.service.impl.InventoryService;
+import com.starbag.inventory.service.InventoryService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -47,6 +47,11 @@ public class InventoryController {
         existing.setReorderLevel(dto.getReorderLevel());
 
         return inventoryService.createInventory(existing);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteInventory(@PathVariable Long id) {
+        inventoryService.deleteInventory(id);
     }
 
 }

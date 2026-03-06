@@ -2,7 +2,9 @@ import axios from 'axios';
 import { Quotation, QuotationItem } from '@/types/quotation';
 
 // Backend API base URL - Update this to match your backend server
-const API_BASE_URL = 'http://localhost:8080/api';
+// Local development: 'http://localhost:8080/api'
+// AWS Production: 'http://3.227.243.51:8080/api'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://3.227.243.51:8080/api';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -74,6 +76,8 @@ const mapBackendStatus = (backendStatus: string): Quotation['status'] => {
       return 'approved'; // SENT means admin approved and sent to customer
     case 'ACCEPTED':
       return 'accepted'; // Customer accepted - ready to convert
+    case 'REJECTED':
+      return 'rejected'; // Quotation was rejected
     case 'CONVERTED':
       return 'converted';
     default:
@@ -273,6 +277,34 @@ export const acceptQuotation = async (id: string): Promise<Quotation> => {
 };
 
 /**
+ * Reject quotation (Admin only)
+ */
+export const rejectQuotation = async (id: string): Promise<Quotation> => {
+  try {
+    const backendId = id.replace('QT-', '');
+    const response = await api.put<BackendQuotation>(`/quotations/${backendId}/reject`);
+    const products = await getProducts();
+    return convertToFrontendQuotation(response.data, products);
+  } catch (error) {
+    console.error('Error rejecting quotation:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete quotation (Admin only - only DRAFT or REJECTED quotations)
+ */
+export const deleteQuotation = async (id: string): Promise<void> => {
+  try {
+    const backendId = id.replace('QT-', '');
+    await api.delete(`/quotations/${backendId}`);
+  } catch (error) {
+    console.error('Error deleting quotation:', error);
+    throw error;
+  }
+};
+
+/**
  * Convert quotation to order (Admin only)
  */
 export const convertQuotationToOrder = async (id: string): Promise<Quotation> => {
@@ -321,6 +353,8 @@ export default {
   searchQuotationsByEmail,
   updateAndSendQuotation,
   acceptQuotation,
+  rejectQuotation,
+  deleteQuotation,
   convertQuotationToOrder,
   getAllOrders,
   getOrdersByEmail,

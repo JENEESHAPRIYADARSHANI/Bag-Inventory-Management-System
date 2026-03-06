@@ -5,12 +5,14 @@ import com.starbag.Order_Management_Service.domain.OrderStatus;
 import com.starbag.Order_Management_Service.dto.OrderDto;
 import com.starbag.Order_Management_Service.mapper.OrderMapper;
 import com.starbag.Order_Management_Service.service.OrderService;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/orders")
+@RequestMapping("/orders") // ✅ OLD format (no /api/v1)
+@CrossOrigin(origins = "*") // ✅ helpful during local dev (optional)
 public class OrderController {
 
     private final OrderService orderService;
@@ -23,6 +25,7 @@ public class OrderController {
 
     // ✅ CREATE (user checkout)
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public OrderDto create(@RequestBody OrderDto dto) {
         Order order = orderMapper.fromDto(dto);
         Order saved = orderService.createOrder(order);

@@ -2,20 +2,17 @@ package com.example.quotation_service.dto;
 
 import lombok.Data;
 import java.math.BigDecimal;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Data
 public class OrderRequestDto {
     private Long quotationId;
     private String customerId;
-    private List<OrderItemDto> items;
     private BigDecimal totalAmount;
-
-    @Data
-    public static class OrderItemDto {
-        private Long productId;
-        private Integer quantity;
-        private BigDecimal unitPrice;
-        private BigDecimal discount;
-    }
+    
+    // Fields for Order Management Service compatibility
+    private String customerName;
+    private LocalDateTime deliveryDate;
+    private String productIds;
+    private String quantities;
 }
