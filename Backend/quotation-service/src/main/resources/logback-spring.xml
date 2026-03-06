@@ -1,26 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <!-- Console appender for local development -->
+    <!-- Console appender -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <!-- Root logger configuration -->
+    <!-- Root logger -->
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
     </root>
 
-    <!-- Application specific loggers -->
+    <!-- Application loggers -->
     <logger name="com.example.quotation_service" level="INFO"/>
     <logger name="org.springframework.web" level="INFO"/>
-    <logger name="org.springframework.security" level="INFO"/>
     <logger name="org.hibernate.SQL" level="WARN"/>
-    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="WARN"/>
-    
-    <!-- Reduce noise from common libraries -->
-    <logger name="org.apache.http" level="WARN"/>
-    <logger name="org.springframework.web.client.RestTemplate" level="WARN"/>
-    <logger name="com.zaxxer.hikari" level="WARN"/>
 </configuration>
