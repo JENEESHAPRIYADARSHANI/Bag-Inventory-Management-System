@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://mysql:3306/supplier_material_db?useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://host.docker.internal:3307/supplier_material_db
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
