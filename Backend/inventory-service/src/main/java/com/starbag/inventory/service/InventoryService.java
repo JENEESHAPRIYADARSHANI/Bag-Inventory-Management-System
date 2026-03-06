@@ -14,4 +14,5 @@ public interface InventoryService {
 
     void deleteInventory(Long id);
 
+
 }

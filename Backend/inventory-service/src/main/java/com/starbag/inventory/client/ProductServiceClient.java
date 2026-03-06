@@ -1,16 +1,32 @@
 package com.starbag.inventory.client;
 
-import org.springframework.web.client.RestTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 @Component
 public class ProductServiceClient {
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    @Value("${product.service.url}")
+    private String productServiceUrl;
 
-    private static final String PRODUCT_SERVICE_URL = "http://18.142.xxx.xxx:8082/api/v1/products/";
+    private final RestTemplate restTemplate;
 
-    public Object getProductById(Long productId) {
-        return restTemplate.getForObject(PRODUCT_SERVICE_URL + productId, Object.class);
+    public ProductServiceClient() {
+        this.restTemplate = new RestTemplate();
+    }
+
+    public boolean productExists(Long productId) {
+        try {
+            String url = productServiceUrl + "/" + productId;
+
+            Object response = restTemplate.getForObject(url, Object.class);
+
+            return response != null;
+
+        } catch (Exception e) {
+            System.out.println("Product service call failed: " + e.getMessage());
+            return false;
+        }
     }
 }
