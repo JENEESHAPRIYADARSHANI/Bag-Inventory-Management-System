@@ -1,14 +1,14 @@
-server:
-  port: 8083
-
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/order_management_db}
-    username: ${SPRING_DATASOURCE_USERNAME:orderuser}
-    password: ${SPRING_DATASOURCE_PASSWORD:password123}
+    url: jdbc:mysql://order-management-db.c36keqki0gue.eu-north-1.rds.amazonaws.com:3306/order_management_db?useSSL=true&requireSSL=true
+    username: admin
+    password: password123
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+
+server:
+  port: 8082

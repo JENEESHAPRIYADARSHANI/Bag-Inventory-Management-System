@@ -44,7 +44,7 @@ volumes:
     build: .
     container_name: order-management-service
     ports:
-      - "8084:8084"
+      - "8082:8082"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://order-management-db.c36keqki0gue.eu-north-1.rds.amazonaws.com:3306/order_management_db?useSSL=true&requireSSL=true
       SPRING_DATASOURCE_USERNAME: admin
