@@ -8,6 +8,7 @@ interface QuotationContextType {
   loading: boolean;
   createQuotation: (data: Omit<Quotation, "id" | "status" | "createdAt" | "updatedAt" | "subtotal" | "totalAmount"> & { items: QuotationItem[] }) => Promise<Quotation>;
   updateQuotation: (id: string, updates: Partial<Quotation>) => Promise<void>;
+  updateAndSendQuotation: (id: string, items: QuotationItem[]) => Promise<void>;
   updateQuotationStatus: (id: string, status: QuotationStatus, reason?: string) => Promise<void>;
   deleteQuotation: (id: string) => void;
   convertToOrder: (id: string) => Promise<string>;
@@ -59,12 +60,15 @@ export function QuotationProvider({ children }: { children: ReactNode }) {
   const loadQuotationsFromAPI = async () => {
     try {
       setLoading(true);
+      console.log('Loading quotations from API...');
       const data = await quotationApi.getAllQuotations();
+      console.log('Quotations loaded from API:', data);
       setQuotations(data);
     } catch (error) {
       console.error('Failed to load quotations:', error);
       toast.error('Failed to load quotations from server');
       // Fallback to localStorage
+      console.log('Falling back to localStorage...');
       loadQuotationsFromLocalStorage();
     } finally {
       setLoading(false);
@@ -116,6 +120,23 @@ export function QuotationProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateAndSendQuotation = async (id: string, items: QuotationItem[]) => {
+    if (USE_API) {
+      try {
+        setLoading(true);
+        await quotationApi.updateAndSendQuotation(id, items);
+        await refreshQuotations();
+        toast.success('Quotation updated and sent successfully');
+      } catch (error) {
+        console.error('Failed to update and send quotation:', error);
+        toast.error('Failed to update and send quotation');
+        throw error;
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   const updateQuotation = async (id: string, updates: Partial<Quotation>) => {
     if (USE_API) {
       try {
@@ -123,7 +144,8 @@ export function QuotationProvider({ children }: { children: ReactNode }) {
         
         // If updating items, send to backend
         if (updates.items) {
-          await quotationApi.updateAndSendQuotation(id, updates.items);
+          // Use updateQuotationOnly for user updates (doesn't change status)
+          await quotationApi.updateQuotationOnly(id, updates.items);
           await refreshQuotations();
           toast.success('Quotation updated successfully');
         } else {
@@ -150,7 +172,7 @@ export function QuotationProvider({ children }: { children: ReactNode }) {
       // LocalStorage mode
       setQuotations((prev) =>
         prev.map((q) => {
-          if (q.id !== id || q.status === "approved" || q.status === "converted") return q;
+          if (q.id !== id || q.status === "sent" || q.status === "converted") return q;
           const updatedItems = updates.items || q.items;
           const { subtotal, totalAmount } = calculateTotals(updatedItems);
           return {
@@ -184,9 +206,9 @@ export function QuotationProvider({ children }: { children: ReactNode }) {
           await quotationApi.rejectQuotation(id);
           await refreshQuotations();
           toast.success('Quotation rejected');
-        } else if (status === 'approved') {
+        } else if (status === 'sent') {
           // This shouldn't happen from user side, but handle it
-          toast.info('Quotation already approved');
+          toast.info('Quotation already sent');
         } else {
           // For other statuses, update locally
           setQuotations((prev) =>
@@ -280,7 +302,7 @@ export function QuotationProvider({ children }: { children: ReactNode }) {
       const orderId = `ORD-${String(Date.now()).slice(-6)}`;
       const quotation = quotations.find((q) => q.id === id);
 
-      if (quotation && (quotation.status === "accepted" || quotation.status === "approved")) {
+      if (quotation && (quotation.status === "accepted" || quotation.status === "sent")) {
         // Create order in localStorage
         const existingOrders = JSON.parse(localStorage.getItem("starbags_orders") || "[]");
         const newOrder = {
@@ -324,6 +346,7 @@ export function QuotationProvider({ children }: { children: ReactNode }) {
         loading,
         createQuotation,
         updateQuotation,
+        updateAndSendQuotation,
         updateQuotationStatus,
         deleteQuotation,
         convertToOrder,

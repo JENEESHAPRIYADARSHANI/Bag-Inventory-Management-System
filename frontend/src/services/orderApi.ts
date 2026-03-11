@@ -1,7 +1,14 @@
-// src/services/orderApi.ts
-const BASE_URL = import.meta.env.VITE_ORDER_API_URL || "http://localhost:8083";
+import axios from "axios";
 
-const ORDERS_PATH = "/orders";
+const ORDER_API_BASE_URL =
+  import.meta.env.VITE_ORDER_API_URL || "http://localhost:8082";
+
+const orderApi = axios.create({
+  baseURL: ORDER_API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 export type OrderStatus =
   | "PENDING"
@@ -23,51 +30,111 @@ export interface OrderDto {
   orderDate?: string;
   status?: OrderStatus;
 }
-async function handleJson<T>(res: Response): Promise<T> {
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(text || `Request failed (${res.status})`);
+
+function getErrorMessage(error: unknown): string {
+  const axiosError = error as {
+    response?: { data?: unknown };
+    message?: string;
+  };
+
+  const data = axiosError.response?.data;
+
+  if (typeof data === "string" && data.trim()) {
+    return data;
   }
-  return res.json() as Promise<T>;
+
+  if (data && typeof data === "object" && "message" in data) {
+    const message = (data as { message?: unknown }).message;
+    if (typeof message === "string" && message.trim()) {
+      return message;
+    }
+  }
+
+  if (typeof axiosError.message === "string" && axiosError.message.trim()) {
+    return axiosError.message;
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "Request failed";
 }
 
 export async function fetchOrders(): Promise<OrderDto[]> {
-  const res = await fetch(`${BASE_URL}/orders`);
-  return handleJson<OrderDto[]>(res);
+  try {
+    const response = await orderApi.get("/orders");
+    return response.data as OrderDto[];
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
 }
 
 export async function fetchOrdersForCustomer(customerId: number): Promise<OrderDto[]> {
-  const res = await fetch(`${BASE_URL}/orders/customer/${customerId}`);
-  return handleJson<OrderDto[]>(res);
+  try {
+    const response = await orderApi.get(`/orders/customer/${customerId}`);
+    return response.data as OrderDto[];
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
+}
+
+export async function fetchOrderById(id: number): Promise<OrderDto> {
+  try {
+    const response = await orderApi.get(`/orders/${id}`);
+    return response.data as OrderDto;
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
 }
 
 export async function createOrder(payload: OrderDto): Promise<OrderDto> {
-  const res = await fetch(`${BASE_URL}/orders`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  return handleJson<OrderDto>(res);
+  try {
+    const response = await orderApi.post("/orders", payload);
+    return response.data as OrderDto;
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
 }
 
-export async function updateOrderStatus(id: number, status: OrderStatus): Promise<OrderDto> {
-  const res = await fetch(`${BASE_URL}/orders/${id}?status=${encodeURIComponent(status)}`, {
-    method: "PUT",
-  });
-  return handleJson<OrderDto>(res);
+export async function updateOrderStatus(
+  id: number,
+  status: "CONFIRMED" | "PROCESSING" | "COMPLETED"
+): Promise<OrderDto> {
+  try {
+    const response = await orderApi.put(`/orders/${id}`, null, {
+      params: { status },
+    });
+    return response.data as OrderDto;
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
 }
 
 export async function requestCancel(id: number): Promise<OrderDto> {
-  const res = await fetch(`${BASE_URL}/orders/${id}/cancel-request`, { method: "PUT" });
-  return handleJson<OrderDto>(res);
+  try {
+    const response = await orderApi.put(`/orders/${id}/cancel`);
+    return response.data as OrderDto;
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
 }
 
-export async function approveCancel(id: number): Promise<OrderDto> {
-  const res = await fetch(`${BASE_URL}/orders/${id}/cancel-approve`, { method: "PUT" });
-  return handleJson<OrderDto>(res);
+export async function adminCancelOrder(id: number): Promise<OrderDto> {
+  try {
+    const response = await orderApi.put(`/orders/${id}/admin-cancel`);
+    return response.data as OrderDto;
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
 }
 
-export async function rejectCancel(id: number): Promise<OrderDto> {
-  const res = await fetch(`${BASE_URL}/orders/${id}/cancel-reject`, { method: "PUT" });
-  return handleJson<OrderDto>(res);
-}
+export default {
+  fetchOrders,
+  fetchOrdersForCustomer,
+  fetchOrderById,
+  createOrder,
+  updateOrderStatus,
+  requestCancel,
+  adminCancelOrder,
+};

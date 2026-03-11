@@ -1,4 +1,3 @@
-// src/pages/Orders.tsx (ADMIN)
 import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -9,10 +8,15 @@ import { Search, ArrowUpDown, RefreshCw, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-import { fetchOrders, type OrderDto, type OrderStatus } from "@/services/orderApi";
+import {
+  fetchOrders,
+  updateOrderStatus,
+  adminCancelOrder,
+  type OrderDto,
+  type OrderStatus,
+} from "@/services/orderApi";
 
-// ✅ MUST match backend OrderStatus enum
-const statusStyles: Record<OrderStatus, string> = {
+const statusStyles: Record<string, string> = {
   COMPLETED: "bg-success/10 text-success border-success/20",
   PROCESSING: "bg-info/10 text-info border-info/20",
   CONFIRMED: "bg-primary/10 text-primary border-primary/20",
@@ -32,11 +36,10 @@ function formatDate(value?: string | null) {
   return Number.isNaN(d.getTime()) ? value : d.toLocaleString();
 }
 
-// If your backend doesn't include these yet, we safely treat them as optional
 type OrderRow = OrderDto & {
-  customerName?: string;
-  totalAmount?: number;
-  deliveryDate?: string;
+  customerName?: string | null;
+  totalAmount?: number | null;
+  deliveryDate?: string | null;
 };
 
 const Orders = () => {
@@ -44,12 +47,12 @@ const Orders = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [q, setQ] = useState<string>("");
+  const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
 
   const loadOrders = async () => {
     try {
       setLoading(true);
       setError(null);
-
       const data = await fetchOrders();
       setOrders(Array.isArray(data) ? (data as OrderRow[]) : []);
     } catch (e: any) {
@@ -63,7 +66,6 @@ const Orders = () => {
 
   useEffect(() => {
     loadOrders();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filtered = useMemo(() => {
@@ -73,8 +75,6 @@ const Orders = () => {
     return orders.filter((o) => {
       const id = o?.id != null ? String(o.id) : "";
       const status = String(o?.status ?? "").toLowerCase();
-
-      // Optional fields (will work automatically once backend sends them)
       const customerName = String(o?.customerName ?? "").toLowerCase();
       const amount = o?.totalAmount != null ? String(o.totalAmount) : "";
       const customerId = o?.customerId != null ? String(o.customerId) : "";
@@ -89,9 +89,137 @@ const Orders = () => {
     });
   }, [orders, q]);
 
+  const handleStatusUpdate = async (
+    orderId: number | undefined,
+    nextStatus: "CONFIRMED" | "PROCESSING" | "COMPLETED"
+  ) => {
+    if (!orderId) return;
+
+    try {
+      setActionLoadingId(orderId);
+      setError(null);
+      await updateOrderStatus(orderId, nextStatus);
+      toast.success(`Order #${orderId} updated to ${nextStatus}`);
+      await loadOrders();
+    } catch (e: any) {
+      const msg = e?.message ?? "Failed to update order status";
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleAdminCancel = async (orderId: number | undefined) => {
+    if (!orderId) return;
+
+    const confirmed = window.confirm(
+      `Are you sure you want to cancel Order #${orderId}?`
+    );
+    if (!confirmed) return;
+
+    try {
+      setActionLoadingId(orderId);
+      setError(null);
+      await adminCancelOrder(orderId);
+      toast.success(`Order #${orderId} cancelled`);
+      await loadOrders();
+    } catch (e: any) {
+      const msg = e?.message ?? "Failed to cancel order";
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const renderActions = (order: OrderRow) => {
+    const status = order.status ?? "PENDING";
+    const isBusy = actionLoadingId === order.id;
+
+    if (status === "PENDING") {
+      return (
+        <div className="flex flex-wrap gap-2">
+          <Button
+            size="sm"
+            onClick={() => handleStatusUpdate(order.id, "CONFIRMED")}
+            disabled={isBusy}
+          >
+            Confirm
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={() => handleAdminCancel(order.id)}
+            disabled={isBusy}
+          >
+            Cancel
+          </Button>
+        </div>
+      );
+    }
+
+    if (status === "CONFIRMED") {
+      return (
+        <div className="flex flex-wrap gap-2">
+          <Button
+            size="sm"
+            onClick={() => handleStatusUpdate(order.id, "PROCESSING")}
+            disabled={isBusy}
+          >
+            Start Processing
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={() => handleAdminCancel(order.id)}
+            disabled={isBusy}
+          >
+            Cancel
+          </Button>
+        </div>
+      );
+    }
+
+    if (status === "PROCESSING") {
+      return (
+        <div className="flex flex-wrap gap-2">
+          <Button
+            size="sm"
+            onClick={() => handleStatusUpdate(order.id, "COMPLETED")}
+            disabled={isBusy}
+          >
+            Complete
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={() => handleAdminCancel(order.id)}
+            disabled={isBusy}
+          >
+            Cancel
+          </Button>
+        </div>
+      );
+    }
+
+    if (status === "COMPLETED") {
+      return <span className="text-sm text-muted-foreground">Completed</span>;
+    }
+
+    if (status === "CANCELLED") {
+      return <span className="text-sm text-muted-foreground">Cancelled</span>;
+    }
+
+    if (status === "CANCEL_REQUESTED") {
+      return <span className="text-sm text-muted-foreground">Legacy status</span>;
+    }
+
+    return <span className="text-sm text-muted-foreground">-</span>;
+  };
+
   return (
     <DashboardLayout title="Orders" subtitle="Manage and track all corporate orders">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-6">
         <div className="flex gap-3 w-full sm:w-auto">
           <div className="relative flex-1 sm:w-80">
@@ -117,7 +245,6 @@ const Orders = () => {
         </div>
       </div>
 
-      {/* Loading */}
       {loading && (
         <Card className="border-border">
           <CardContent className="flex items-center justify-center py-12">
@@ -129,21 +256,21 @@ const Orders = () => {
         </Card>
       )}
 
-      {/* Error */}
       {!loading && error && (
         <Card className="border-border">
           <CardContent className="py-8 text-red-600">{error}</CardContent>
         </Card>
       )}
 
-      {/* Empty */}
       {!loading && !error && filtered.length === 0 && (
         <Card className="border-border">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Package className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="font-semibold text-foreground mb-2">No orders found</h3>
             <p className="text-sm text-muted-foreground">
-              {q ? `No orders match "${q}".` : "Orders will appear here after customers place orders."}
+              {q
+                ? `No orders match "${q}".`
+                : "Orders will appear here after customers place orders."}
             </p>
             {q && (
               <Button className="mt-4" variant="outline" onClick={() => setQ("")}>
@@ -154,7 +281,6 @@ const Orders = () => {
         </Card>
       )}
 
-      {/* Table */}
       {!loading && !error && filtered.length > 0 && (
         <div className="rounded-xl border border-border bg-card overflow-hidden animate-fade-in">
           <div className="overflow-x-auto">
@@ -189,15 +315,20 @@ const Orders = () => {
                   <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Delivery
                   </th>
+
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Actions
+                  </th>
                 </tr>
               </thead>
 
               <tbody className="divide-y divide-border">
                 {filtered.map((order, index) => {
-                  const rowKey = order?.id != null ? String(order.id) : `order-row-${index}`;
+                  const rowKey =
+                    order?.id != null ? String(order.id) : `order-row-${index}`;
+
                   const status = (order?.status ?? "PENDING") as OrderStatus;
 
-                  // These will show "-" until backend provides them
                   const customerDisplay =
                     order.customerName ??
                     (order.customerId != null ? `Customer #${order.customerId}` : "-");
@@ -238,6 +369,8 @@ const Orders = () => {
                       <td className="px-6 py-4 text-sm text-muted-foreground">
                         {formatDate(deliveryDate)}
                       </td>
+
+                      <td className="px-6 py-4">{renderActions(order)}</td>
                     </tr>
                   );
                 })}

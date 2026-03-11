@@ -59,6 +59,17 @@ public class QuotationController {
         }
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Quotation> updateQuotation(@PathVariable Long id,
+            @RequestBody QuotationUpdateRequest request) {
+        try {
+            Quotation updated = quotationService.updateQuotation(id, request);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     @PutMapping("/{id}/accept")
     public ResponseEntity<Quotation> acceptQuotation(@PathVariable Long id) {
         try {

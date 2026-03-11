@@ -4,8 +4,14 @@ import com.starbag.product_catalog_service.domain.Product;
 import java.util.List;
 
 public interface ProductService {
+
     List<Product> getAllProducts();
+
     Product createProduct(Product product);
-    Product updateProduct(String id, Product product);
-    void deleteProduct(String id);
+
+    Product updateProduct(Long id, Product product);
+
+    void deleteProduct(Long id);
+
+    Product getProductById(Long id);
 }

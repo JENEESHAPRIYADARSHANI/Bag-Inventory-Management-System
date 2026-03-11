@@ -1,11 +1,13 @@
 spring:
   application:
     name: product-service
+
   datasource:
-    url: jdbc:mysql://localhost:3307/starbag_product_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
-    username: root
-    password: "@Abishek2001"
+    url: jdbc:mysql://localhost:3306/starbag_product_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: starbag
+    password: Starbag123!
     driver-class-name: com.mysql.cj.jdbc.Driver
+
   jpa:
     show-sql: true
     hibernate:
@@ -13,6 +15,12 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 server:
   port: 8082

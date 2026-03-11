@@ -5,10 +5,10 @@ services:
     container_name: supplier-mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}   # from your local environment
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: supplier_material_db
     ports:
-      - "3307:3306"
+      - "3307:3306"  # host:container
     volumes:
       - mysql_data:/var/lib/mysql
 
@@ -22,8 +22,8 @@ services:
       - mysql
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/supplier_material_db
-      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}  # from your local environment
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}  # from your local environment
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
 
 volumes:
   mysql_data:
