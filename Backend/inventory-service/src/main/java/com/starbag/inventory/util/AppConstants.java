@@ -1,4 +1,4 @@
-package com.starbag.inventory.constants;
+package com.starbag.inventory.util;
 
 public class AppConstants {
     // todo movr yo thid into util
