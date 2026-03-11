@@ -20,7 +20,6 @@ public class InventoryServiceImpl implements InventoryService {
         this.inventoryRepository = inventoryRepository;
         this.productServiceClient = productServiceClient;
     }
-
     // CREATE
     @Override
     public Inventory createInventory(Inventory inventory) {
@@ -32,10 +31,8 @@ public class InventoryServiceImpl implements InventoryService {
             throw new RuntimeException(
                     "Product does not exist in Product Catalog Service");
         }
-
         return inventoryRepository.save(inventory);
     }
-
     // READ
     @Override
     public List<Inventory> getAllInventory() {
